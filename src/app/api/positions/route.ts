@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, departmentId } = body;
+    const { title, departmentId, company, active } = body;
 
     if (!title || !departmentId) {
       return NextResponse.json(
@@ -54,7 +54,12 @@ export async function POST(request: NextRequest) {
     }
 
     const position = await prisma.jobPosition.create({
-      data: { title, departmentId },
+      data: {
+        title,
+        departmentId,
+        company: company || null,
+        ...(typeof active === "boolean" ? { active } : {}),
+      },
       include: { department: true },
     });
 

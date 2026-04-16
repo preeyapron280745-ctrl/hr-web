@@ -440,6 +440,12 @@ enum EmployeeType {
 enum FormStatus {
   DRAFT
   SUBMITTED
+  SCREENING
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  PROBATION
+  HIRED
+  REJECTED
 }
 
 model ApplicationForm {
@@ -605,9 +611,50 @@ model ApplicationForm {
   createdAt                DateTime             @default(now())
   updatedAt                DateTime             @updatedAt
 
-  trainings        TrainingItem[]
-  workExperiences  WorkExperienceItem[]
-  languages        LanguageItem[]
+  trainings               TrainingItem[]
+  workExperiences         WorkExperienceItem[]
+  languages               LanguageItem[]
+  interviewEvaluations    InterviewEvaluation[]
+  probationEvaluations    ProbationEvaluation[]
+}
+
+model InterviewEvaluation {
+  id             String          @id @default(cuid())
+  form           ApplicationForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  formId         String
+  evaluatorId    String?
+  evaluationDate DateTime        @db.Date
+  round          Int             @default(1)
+  personality    Int?
+  communication  Int?
+  knowledge      Int?
+  experience     Int?
+  attitude       Int?
+  overallScore   Int?
+  recommendation String?
+  strengths      String?
+  weaknesses     String?
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model ProbationEvaluation {
+  id              String          @id @default(cuid())
+  form            ApplicationForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  formId          String
+  evaluatorId     String?
+  evaluationDate  DateTime        @db.Date
+  workQuality     Int?
+  discipline      Int?
+  teamwork        Int?
+  responsibility  Int?
+  learningAbility Int?
+  overallScore    Int?
+  result          String?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model TrainingItem {
