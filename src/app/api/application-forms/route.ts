@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    const user = session?.user as { role?: string; department?: string } | undefined;
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const company = searchParams.get("company");
@@ -37,6 +43,19 @@ export async function GET(request: NextRequest) {
       where.resumeUrl = { not: null };
     } else if (hasResume === "false") {
       where.resumeUrl = null;
+    }
+
+    // Manager: filter by their department
+    if (user?.role === "MANAGER" && user.department) {
+      const dept = await prisma.department.findUnique({
+        where: { name: user.department },
+        select: { positions: { select: { id: true } } },
+      });
+      const positionIds = dept?.positions.map((p) => p.id) || [];
+      if (positionIds.length === 0) {
+        return NextResponse.json([]);
+      }
+      where.positionId = { in: positionIds };
     }
 
     if (q && q.trim().length > 0) {
