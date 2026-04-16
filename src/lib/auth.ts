@@ -9,13 +9,19 @@ export const authOptions: NextAuthOptions = {
       id: "staff",
       name: "Staff Login",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+        if (!credentials?.username || !credentials?.password) return null;
+        // Support login with username OR email
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { username: credentials.username },
+              { email: credentials.username },
+            ],
+          },
         });
         if (!user || !user.active) return null;
         const valid = await bcrypt.compare(credentials.password, user.password);

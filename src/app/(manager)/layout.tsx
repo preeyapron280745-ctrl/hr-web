@@ -4,14 +4,20 @@ import Sidebar, { MenuItem } from "@/components/layout/Sidebar";
 import TopNav from "@/components/layout/TopNav";
 import {
   LayoutDashboard,
+  FileText,
   UserCheck,
+  Award,
   CalendarCheck,
+  UserX,
 } from "lucide-react";
 
 const managerMenuItems: MenuItem[] = [
   { label: "Dashboard", href: "/manager/dashboard", icon: LayoutDashboard },
-  { label: "รีวิวผู้สมัคร", href: "/manager/reviews", icon: UserCheck },
+  { label: "ใบสมัครงาน (หัวหน้าแผนก)", href: "/manager/reviews", icon: FileText },
+  { label: "ใบประเมินสัมภาษณ์", href: "/manager/interview-eval", icon: UserCheck },
+  { label: "ใบประเมินทดลองงาน", href: "/manager/probation-eval", icon: Award },
   { label: "สัมภาษณ์", href: "/manager/interviews", icon: CalendarCheck },
+  { label: "ไม่ผ่าน/ปฏิเสธ", href: "/manager/rejected", icon: UserX },
 ];
 
 export default function ManagerLayout({
