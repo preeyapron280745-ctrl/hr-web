@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, UploadCloud, CheckCircle2, X } from "lucide-react";
-import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
-import { COMPANIES, EMPLOYEE_TYPES } from "@/lib/form-constants";
+import {
+  Loader2,
+  UploadCloud,
+  CheckCircle2,
+  X,
+  FileText as FileIcon,
+  AlertCircle,
+} from "lucide-react";
+import { COMPANIES, EMPLOYEE_TYPES, EDUCATION_LEVELS } from "@/lib/form-constants";
 
 interface Position {
   id: string;
   title: string;
   company: string | null;
   active: boolean;
-  department?: { id: string; name: string };
 }
 
 interface UploadedFile {
@@ -21,9 +25,28 @@ interface UploadedFile {
   fileSize?: number;
 }
 
+const CHANNELS = [
+  "พนักงานที่รู้จัก",
+  "Walk in (เข้ามาสมัครด้วยตนเอง)",
+  "ป้ายประกาศ",
+  "Job Thai",
+  "Job DB",
+  "Facebook",
+  "Linkedin",
+  "Job BKK",
+];
+
+function genCode() {
+  const d = new Date();
+  const y = d.getFullYear().toString().slice(-2);
+  const m = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+  const rnd = Math.floor(Math.random() * 9000 + 1000);
+  return `RES${y}${m}${day}-${rnd}`;
+}
+
 export default function FromResumePage() {
   const router = useRouter();
-
   const [positions, setPositions] = useState<Position[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -34,33 +57,41 @@ export default function FromResumePage() {
   const [employeeType, setEmployeeType] = useState("");
   const [company, setCompany] = useState("");
   const [positionId, setPositionId] = useState("");
+  const [positionId2, setPositionId2] = useState("");
+  const [positionId3, setPositionId3] = useState("");
+  const [channel, setChannel] = useState("");
+  const [applicationCode] = useState(genCode());
+
+  // Personal info
   const [fullNameTh, setFullNameTh] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState<"" | "MALE" | "FEMALE">("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
+
+  // Last work
+  const [lastCompany, setLastCompany] = useState("");
+  const [lastPosition, setLastPosition] = useState("");
+  const [lastSalaryMin, setLastSalaryMin] = useState("");
+  const [lastSalaryMax, setLastSalaryMax] = useState("");
+
+  // Files
   const [photo, setPhoto] = useState<UploadedFile | null>(null);
   const [resume, setResume] = useState<UploadedFile | null>(null);
 
   useEffect(() => {
-    fetchPositions();
+    fetch("/api/positions")
+      .then((r) => r.json())
+      .then((d: Position[]) => setPositions(d.filter((p) => p.active)))
+      .catch(() => {});
   }, []);
-
-  const fetchPositions = async () => {
-    try {
-      const res = await fetch("/api/positions");
-      if (res.ok) {
-        const data: Position[] = await res.json();
-        setPositions(data.filter((p) => p.active));
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const filteredPositions = company
     ? positions.filter((p) => !p.company || p.company === company)
     : positions;
 
-  const handleFileUpload = async (
+  const uploadFile = async (
     file: File,
     folder: string,
     setState: (v: UploadedFile | null) => void,
@@ -79,13 +110,8 @@ export default function FromResumePage() {
         return;
       }
       const data = await res.json();
-      setState({
-        url: data.url,
-        fileName: data.fileName ?? file.name,
-        fileSize: data.fileSize ?? file.size,
-      });
+      setState({ url: data.url, fileName: data.fileName ?? file.name, fileSize: data.fileSize });
     } catch (err) {
-      console.error(err);
       setError("อัปโหลดไฟล์ไม่สำเร็จ");
     } finally {
       setBusy(false);
@@ -98,16 +124,15 @@ export default function FromResumePage() {
 
     if (!employeeType) return setError("กรุณาเลือกประเภทพนักงาน");
     if (!company) return setError("กรุณาเลือกบริษัท");
-    if (!positionId) return setError("กรุณาเลือกตำแหน่ง");
-    if (!fullNameTh.trim()) return setError("กรุณากรอกชื่อ-นามสกุล (ภาษาไทย)");
-    if (!phone.trim()) return setError("กรุณากรอกเบอร์โทรศัพท์");
+    if (!positionId) return setError("กรุณาเลือกตำแหน่งที่สนใจ #1");
+    if (!fullNameTh.trim()) return setError("กรุณากรอกชื่อ-นามสกุล");
+    if (!phone.trim()) return setError("กรุณากรอกเบอร์โทร");
+    if (!resume) return setError("กรุณาอัปโหลด Resume");
 
-    const selectedPosition = positions.find((p) => p.id === positionId);
-    if (!selectedPosition) {
-      return setError("ไม่พบตำแหน่งที่เลือก");
-    }
+    const pos1 = positions.find((p) => p.id === positionId);
+    const pos2 = positions.find((p) => p.id === positionId2);
+    const pos3 = positions.find((p) => p.id === positionId3);
 
-    // Split full name into first and last
     const parts = fullNameTh.trim().split(/\s+/);
     const firstNameTh = parts[0] ?? "";
     const lastNameTh = parts.slice(1).join(" ");
@@ -118,30 +143,39 @@ export default function FromResumePage() {
         employeeType,
         company,
         positionId,
-        positionTitle: selectedPosition.title,
+        positionTitle: pos1?.title || "",
+        positionId2: positionId2 || null,
+        positionTitle2: pos2?.title || null,
+        positionId3: positionId3 || null,
+        positionTitle3: pos3?.title || null,
+        applicationCode,
+        channel: channel || null,
         firstNameTh,
         lastNameTh,
+        age: age ? parseInt(age) : null,
+        gender: gender || null,
         phone: phone.trim(),
         email: email.trim() || null,
+        educationLevelText: educationLevel || null,
+        lastCompany: lastCompany.trim() || null,
+        lastPosition: lastPosition.trim() || null,
+        lastSalaryMin: lastSalaryMin ? parseFloat(lastSalaryMin) : null,
+        lastSalaryMax: lastSalaryMax ? parseFloat(lastSalaryMax) : null,
         photoUrl: photo?.url ?? null,
         resumeUrl: resume?.url ?? null,
       };
-
       const res = await fetch("/api/forms/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         setError(err?.error || "บันทึกข้อมูลไม่สำเร็จ");
         return;
       }
-
       router.push("/hr/applications");
     } catch (err) {
-      console.error(err);
       setError("เกิดข้อผิดพลาดในการบันทึก");
     } finally {
       setSaving(false);
@@ -149,165 +183,195 @@ export default function FromResumePage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-5xl pb-12">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          From Resume (บันทึกใบสมัครจาก Resume)
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900">From Resume</h1>
         <p className="mt-1 text-sm text-gray-500">
-          ใช้สำหรับ HR บันทึกข้อมูลผู้สมัครที่ส่ง Resume เป็นกระดาษหรือไฟล์มาด้วยตนเอง
+          บันทึกข้อมูลผู้สมัครจาก Resume (กระดาษ/ไฟล์) — รหัสใบสมัคร: <span className="font-semibold text-green-700">{applicationCode}</span>
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-      >
-        {/* Row 1: employeeType & company */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              ประเภทพนักงาน<span className="ml-0.5 text-red-500">*</span>
-            </label>
-            <select
+      {error && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="h-4 w-4" />
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Section 1: Application Info */}
+        <Card title="ข้อมูลการสมัคร">
+          <Field label="ประเภทพนักงาน" required>
+            <ButtonGroup
+              options={EMPLOYEE_TYPES.map((t) => ({ value: t.value, label: t.label }))}
               value={employeeType}
-              onChange={(e) => setEmployeeType(e.target.value)}
-              required
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
-            >
-              <option value="" disabled>
-                -- เลือกประเภทพนักงาน --
-              </option>
-              {EMPLOYEE_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              บริษัท<span className="ml-0.5 text-red-500">*</span>
-            </label>
+              onChange={setEmployeeType}
+              cols={3}
+            />
+          </Field>
+
+          <Field label="บริษัท" required>
             <select
               value={company}
               onChange={(e) => {
                 setCompany(e.target.value);
                 setPositionId("");
+                setPositionId2("");
+                setPositionId3("");
               }}
+              className={inputCls}
               required
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
             >
-              <option value="" disabled>
-                -- เลือกบริษัท --
-              </option>
+              <option value="">-- เลือกบริษัท --</option>
               {COMPANIES.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
+                <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
+          </Field>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <Field label="สนใจสมัครตำแหน่ง 1" required>
+              <select value={positionId} onChange={(e) => setPositionId(e.target.value)} className={inputCls} required>
+                <option value="">-- เลือกตำแหน่ง --</option>
+                {filteredPositions.map((p) => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="สนใจสมัครตำแหน่ง 2">
+              <select value={positionId2} onChange={(e) => setPositionId2(e.target.value)} className={inputCls}>
+                <option value="">-- ไม่ระบุ --</option>
+                {filteredPositions.filter((p) => p.id !== positionId).map((p) => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="สนใจสมัครตำแหน่ง 3">
+              <select value={positionId3} onChange={(e) => setPositionId3(e.target.value)} className={inputCls}>
+                <option value="">-- ไม่ระบุ --</option>
+                {filteredPositions.filter((p) => p.id !== positionId && p.id !== positionId2).map((p) => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+            </Field>
           </div>
-        </div>
 
-        {/* Position */}
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">
-            ตำแหน่ง<span className="ml-0.5 text-red-500">*</span>
-          </label>
-          <select
-            value={positionId}
-            onChange={(e) => setPositionId(e.target.value)}
-            required
-            className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
-          >
-            <option value="" disabled>
-              -- เลือกตำแหน่ง --
-            </option>
-            {filteredPositions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title}
-                {p.department?.name ? ` (${p.department.name})` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
+          <Field label="ช่องทาง">
+            <select value={channel} onChange={(e) => setChannel(e.target.value)} className={inputCls}>
+              <option value="">-- เลือกช่องทาง --</option>
+              {CHANNELS.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
+        </Card>
 
-        {/* Name */}
-        <Input
-          label="ชื่อ-นามสกุล (ภาษาไทย)"
-          type="text"
-          value={fullNameTh}
-          onChange={(e) => setFullNameTh(e.target.value)}
-          placeholder="เช่น สมชาย ใจดี"
-          required
-        />
+        {/* Section 2: Personal Info */}
+        <Card title="ข้อมูลส่วนตัว">
+          <Field label="ชื่อ - นามสกุล" required>
+            <input type="text" value={fullNameTh} onChange={(e) => setFullNameTh(e.target.value)} className={inputCls} placeholder="เช่น สมชาย ใจดี" required />
+          </Field>
 
-        {/* Contact */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Input
-            label="เบอร์โทรศัพท์"
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="0812345678"
-            required
-          />
-          <Input
-            label="อีเมล"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="example@email.com"
-          />
-        </div>
-
-        {/* Uploads */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <FileUploadBox
-            label="อัปโหลดรูปถ่าย"
-            accept="image/*"
-            busy={uploadingPhoto}
-            file={photo}
-            onChoose={(file) =>
-              handleFileUpload(file, "photos", setPhoto, setUploadingPhoto)
-            }
-            onClear={() => setPhoto(null)}
-          />
-          <FileUploadBox
-            label="อัปโหลด Resume (PDF / รูปภาพ)"
-            accept=".pdf,image/*"
-            busy={uploadingResume}
-            file={resume}
-            onChoose={(file) =>
-              handleFileUpload(file, "resumes", setResume, setUploadingResume)
-            }
-            onClear={() => setResume(null)}
-          />
-        </div>
-
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
-            {error}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="อายุ">
+              <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className={inputCls} min={0} />
+            </Field>
+            <Field label="เพศ">
+              <ButtonGroup
+                options={[
+                  { value: "MALE", label: "ชาย" },
+                  { value: "FEMALE", label: "หญิง" },
+                ]}
+                value={gender}
+                onChange={(v) => setGender(v as any)}
+                cols={2}
+              />
+            </Field>
           </div>
-        )}
 
-        <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-          <Button
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="เบอร์โทร" required>
+              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} placeholder="0812345678" required />
+            </Field>
+            <Field label="Email">
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="example@email.com" />
+            </Field>
+          </div>
+
+          <Field label="ระดับการศึกษา">
+            <select value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)} className={inputCls}>
+              <option value="">-- เลือกระดับการศึกษา --</option>
+              {EDUCATION_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </Field>
+        </Card>
+
+        {/* Section 3: Last Work */}
+        <Card title="ประสบการณ์ทำงานล่าสุด">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="บริษัทล่าสุด">
+              <input type="text" value={lastCompany} onChange={(e) => setLastCompany(e.target.value)} className={inputCls} />
+            </Field>
+            <Field label="ตำแหน่งล่าสุด">
+              <input type="text" value={lastPosition} onChange={(e) => setLastPosition(e.target.value)} className={inputCls} />
+            </Field>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="เงินเดือนล่าสุด Min (บาท)">
+              <input type="number" value={lastSalaryMin} onChange={(e) => setLastSalaryMin(e.target.value)} className={inputCls} min={0} />
+            </Field>
+            <Field label="เงินเดือนล่าสุด Max (บาท)">
+              <input type="number" value={lastSalaryMax} onChange={(e) => setLastSalaryMax(e.target.value)} className={inputCls} min={0} />
+            </Field>
+          </div>
+        </Card>
+
+        {/* Section 4: Files */}
+        <Card title="เอกสาร">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FileField
+              label="รูปถ่าย"
+              value={photo}
+              uploading={uploadingPhoto}
+              accept="image/*"
+              onChange={(file) => uploadFile(file, "photos", setPhoto, setUploadingPhoto)}
+              onClear={() => setPhoto(null)}
+            />
+            <FileField
+              label="Resume (PDF / รูปภาพ)"
+              required
+              value={resume}
+              uploading={uploadingResume}
+              accept=".pdf,image/*,.doc,.docx"
+              onChange={(file) => uploadFile(file, "resumes", setResume, setUploadingResume)}
+              onClear={() => setResume(null)}
+            />
+          </div>
+        </Card>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3">
+          <button
             type="button"
-            variant="secondary"
-            onClick={() => router.push("/hr/applications")}
-            disabled={saving}
+            onClick={() => router.back()}
+            className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             ยกเลิก
-          </Button>
+          </button>
           <button
             type="submit"
-            disabled={saving || uploadingPhoto || uploadingResume}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-green-600/30 hover:bg-green-700 disabled:opacity-50"
           >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            บันทึกใบสมัคร
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                กำลังบันทึก...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                บันทึกใบสมัคร
+              </>
+            )}
           </button>
         </div>
       </form>
@@ -315,83 +379,119 @@ export default function FromResumePage() {
   );
 }
 
-/* ---------- File upload sub component ---------- */
+const inputCls =
+  "block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 transition-colors focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20";
 
-interface FileUploadBoxProps {
-  label: string;
-  accept: string;
-  busy: boolean;
-  file: UploadedFile | null;
-  onChoose: (file: File) => void;
-  onClear: () => void;
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="border-b border-green-100 bg-green-50/50 px-6 py-3">
+        <h2 className="text-base font-semibold text-green-800">{title}</h2>
+      </div>
+      <div className="space-y-4 p-6">{children}</div>
+    </div>
+  );
 }
 
-function FileUploadBox({
+function Field({
   label,
-  accept,
-  busy,
-  file,
-  onChoose,
-  onClear,
-}: FileUploadBoxProps) {
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <label className="mb-1.5 block text-sm font-medium text-gray-700">
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
+      {children}
+    </div>
+  );
+}
 
-      {file ? (
-        <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3">
-          <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-green-600" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-gray-800">
-              {file.fileName}
-            </p>
-            <a
-              href={file.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-green-700 underline"
-            >
-              ดูไฟล์
-            </a>
+function ButtonGroup({
+  options,
+  value,
+  onChange,
+  cols = 2,
+}: {
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  cols?: number;
+}) {
+  const colsCls = cols === 3 ? "md:grid-cols-3" : cols === 2 ? "md:grid-cols-2" : "";
+  return (
+    <div className={`grid gap-2 ${colsCls}`}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={`rounded-lg border-2 px-4 py-2.5 text-sm font-medium transition-all ${
+            value === o.value
+              ? "border-green-600 bg-green-600 text-white shadow-sm"
+              : "border-gray-200 bg-white text-gray-700 hover:border-green-300 hover:bg-green-50"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function FileField({
+  label,
+  required,
+  value,
+  uploading,
+  accept,
+  onChange,
+  onClear,
+}: {
+  label: string;
+  required?: boolean;
+  value: { url: string; fileName: string; fileSize?: number } | null;
+  uploading: boolean;
+  accept: string;
+  onChange: (file: File) => void;
+  onClear: () => void;
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-gray-700">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {value ? (
+        <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-4 py-3">
+          <div className="flex items-center gap-2 truncate">
+            <FileIcon className="h-5 w-5 flex-shrink-0 text-green-600" />
+            <span className="truncate text-sm text-gray-800">{value.fileName}</span>
           </div>
-          <button
-            type="button"
-            onClick={onClear}
-            className="rounded p-1 text-gray-400 hover:bg-white hover:text-gray-600"
-            aria-label="ลบไฟล์"
-          >
-            <X className="h-4 w-4" />
+          <button type="button" onClick={onClear} className="text-red-500 hover:text-red-700">
+            <X className="h-5 w-5" />
           </button>
         </div>
       ) : (
-        <label
-          className={
-            "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors " +
-            (busy
-              ? "border-green-400 bg-green-50"
-              : "border-gray-300 bg-gray-50 hover:border-green-400 hover:bg-green-50/50")
-          }
-        >
-          {busy ? (
+        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50/50 p-6 text-center hover:bg-green-50">
+          {uploading ? (
             <Loader2 className="h-8 w-8 animate-spin text-green-600" />
           ) : (
-            <UploadCloud className="h-8 w-8 text-gray-400" />
+            <UploadCloud className="h-8 w-8 text-green-600" />
           )}
-          <span className="text-center text-xs text-gray-500">
-            {busy ? "กำลังอัปโหลด..." : "คลิกเพื่อเลือกไฟล์ (สูงสุด 10MB)"}
-          </span>
+          <span className="text-sm text-gray-700">คลิกเพื่อเลือกไฟล์ (สูงสุด 10MB)</span>
           <input
             type="file"
             accept={accept}
-            disabled={busy}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) onChoose(f);
-              e.target.value = "";
-            }}
             className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onChange(file);
+            }}
           />
         </label>
       )}

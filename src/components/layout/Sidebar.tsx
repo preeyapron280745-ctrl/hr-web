@@ -26,20 +26,20 @@ export default function Sidebar({ role, menuItems }: SidebarProps) {
   const roleLabels: Record<string, string> = {
     hr: "HR",
     admin: "ผู้ดูแลระบบ",
-    manager: "ผู้จัดการ",
+    manager: "หัวหน้าแผนก",
   };
 
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-blue-700 px-4">
+      <div className="flex h-16 items-center justify-between border-b border-green-700 px-4">
         <Link href="/" className="flex items-center gap-2 overflow-hidden">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
             <Briefcase className="h-5 w-5 text-white" />
           </div>
           {!collapsed && (
             <span className="whitespace-nowrap text-lg font-bold text-white">
-              HR Recruit
+              HR - ใบสมัครงาน
             </span>
           )}
         </Link>
@@ -66,7 +66,7 @@ export default function Sidebar({ role, menuItems }: SidebarProps) {
       {/* Role badge */}
       {!collapsed && (
         <div className="px-4 py-3">
-          <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-blue-200">
+          <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-green-100">
             {roleLabels[role] || role}
           </span>
         </div>
@@ -88,7 +88,7 @@ export default function Sidebar({ role, menuItems }: SidebarProps) {
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
                       ? "bg-white/15 text-white"
-                      : "text-blue-100 hover:bg-white/10 hover:text-white"
+                      : "text-green-100 hover:bg-white/10 hover:text-white"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
@@ -102,10 +102,10 @@ export default function Sidebar({ role, menuItems }: SidebarProps) {
       </nav>
 
       {/* Logout */}
-      <div className="border-t border-blue-700 p-3">
+      <div className="border-t border-green-700 p-3">
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-blue-100 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-green-100 transition-colors hover:bg-white/10 hover:text-white"
           title={collapsed ? "ออกจากระบบ" : undefined}
         >
           <LogOut className="h-5 w-5 shrink-0" />
@@ -128,7 +128,7 @@ export default function Sidebar({ role, menuItems }: SidebarProps) {
       {/* Mobile sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-blue-800 transition-transform duration-300 lg:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-green-700 transition-transform duration-300 lg:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -138,7 +138,7 @@ export default function Sidebar({ role, menuItems }: SidebarProps) {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden h-screen flex-col bg-blue-800 transition-all duration-300 lg:flex",
+          "hidden h-screen flex-col bg-green-700 transition-all duration-300 lg:flex",
           collapsed ? "w-16" : "w-64"
         )}
       >

@@ -12,17 +12,17 @@ export default function TopNav({ title, showHamburger = true }: TopNavProps) {
   const { data: session } = useSession();
 
   const roleLabels: Record<string, string> = {
-    hr: "HR",
-    admin: "ผู้ดูแลระบบ",
-    manager: "ผู้จัดการ",
-    applicant: "ผู้สมัครงาน",
+    HR: "ฝ่ายบุคคล",
+    ADMIN: "ผู้ดูแลระบบ",
+    MANAGER: "หัวหน้าแผนก",
+    APPLICANT: "ผู้สมัครงาน",
   };
 
   const roleBadgeColors: Record<string, string> = {
-    hr: "bg-blue-100 text-blue-700",
-    admin: "bg-purple-100 text-purple-700",
-    manager: "bg-green-100 text-green-700",
-    applicant: "bg-orange-100 text-orange-700",
+    HR: "bg-green-100 text-green-700",
+    ADMIN: "bg-emerald-100 text-emerald-700",
+    MANAGER: "bg-teal-100 text-teal-700",
+    APPLICANT: "bg-lime-100 text-lime-700",
   };
 
   const handleMobileMenu = () => {
@@ -64,8 +64,8 @@ export default function TopNav({ title, showHamburger = true }: TopNavProps) {
         )}
 
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-            <User className="h-4 w-4 text-blue-600" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+            <User className="h-4 w-4 text-green-700" />
           </div>
           <span className="hidden text-sm font-medium text-gray-700 sm:block">
             {userName}

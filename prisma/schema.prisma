@@ -455,6 +455,17 @@ model ApplicationForm {
   company                  Company
   positionId               String?
   positionTitle            String
+  positionId2              String?
+  positionTitle2           String?
+  positionId3              String?
+  positionTitle3           String?
+  applicationCode          String?
+  channel                  String?
+  lastCompany              String?
+  lastPosition             String?
+  lastSalaryMin            Float?
+  lastSalaryMax            Float?
+  educationLevelText       String?
   sourceOfInfo             String[]
   sourceOfInfoOther        String?
   referredBy               String?
