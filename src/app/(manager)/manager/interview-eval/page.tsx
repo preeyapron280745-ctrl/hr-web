@@ -61,17 +61,19 @@ const SCORE_FIELDS: {
 ];
 
 const RECOMMEND_LABELS: Record<string, string> = {
-  STRONGLY_RECOMMEND: "แนะนำอย่างยิ่ง",
-  RECOMMEND: "แนะนำ",
-  NEUTRAL: "เป็นกลาง",
-  NOT_RECOMMEND: "ไม่แนะนำ",
+  HIRE: "สมควรจ้าง",
+  REINTERVIEW: "เห็นควรให้มีการสัมภาษณ์อีกครั้ง",
+  OTHER_DEPT: "เหมาะสมกับแผนกอื่น",
+  HOLD: "ไม่เหมาะสมในขณะนี้ (เก็บข้อมูลไว้พิจารณาต่อไป)",
+  REJECT: "ไม่เหมาะสม",
 };
 
 const RECOMMEND_OPTIONS = [
-  { v: "STRONGLY_RECOMMEND", l: "แนะนำอย่างยิ่ง" },
-  { v: "RECOMMEND", l: "แนะนำ" },
-  { v: "NEUTRAL", l: "เป็นกลาง" },
-  { v: "NOT_RECOMMEND", l: "ไม่แนะนำ" },
+  { v: "HIRE", l: "สมควรจ้าง", desc: "ผ่านสัมภาษณ์ ส่งเข้าทดลองงาน" },
+  { v: "REINTERVIEW", l: "เห็นควรให้มีการสัมภาษณ์อีกครั้ง", desc: "นัดสัมภาษณ์รอบถัดไป" },
+  { v: "OTHER_DEPT", l: "เหมาะสมกับแผนกอื่น", desc: "แนะนำให้พิจารณากับแผนกอื่น" },
+  { v: "HOLD", l: "ไม่เหมาะสมในขณะนี้ (เก็บข้อมูลไว้พิจารณาต่อไป)", desc: "เก็บข้อมูลไว้พิจารณาในอนาคต" },
+  { v: "REJECT", l: "ไม่เหมาะสม", desc: "ปฏิเสธไม่ผ่านการพิจารณา" },
 ];
 
 function fullName(f?: FormRow | null) {

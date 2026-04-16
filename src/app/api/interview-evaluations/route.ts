@@ -114,10 +114,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Update ApplicationForm status to INTERVIEWED
+    // Update ApplicationForm status based on recommendation
+    let newStatus: any = "INTERVIEWED";
+    if (recommendation === "HIRE") {
+      newStatus = "PROBATION"; // Move to probation if hire decision
+    } else if (recommendation === "REINTERVIEW") {
+      newStatus = "INTERVIEW_SCHEDULED"; // Schedule another interview
+    } else if (recommendation === "REJECT") {
+      newStatus = "REJECTED";
+    } else if (recommendation === "HOLD" || recommendation === "OTHER_DEPT") {
+      newStatus = "INTERVIEWED"; // Stay as interviewed for further review
+    }
+
     await prisma.applicationForm.update({
       where: { id: formId },
-      data: { status: "INTERVIEWED" },
+      data: { status: newStatus },
     });
 
     return NextResponse.json(evaluation, { status: 201 });

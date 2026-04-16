@@ -31,6 +31,7 @@ type Evaluation = {
   id: string;
   formId: string;
   evaluationDate: string;
+  round?: number | null;
   workQuality?: number | null;
   discipline?: number | null;
   teamwork?: number | null;
@@ -146,6 +147,7 @@ export default function HRProbationPage() {
   const [search, setSearch] = useState("");
 
   const [selectedForm, setSelectedForm] = useState<FormRow | null>(null);
+  const [round, setRound] = useState(1);
   const [scores, setScores] = useState({
     workQuality: 0,
     discipline: 0,
@@ -210,6 +212,7 @@ export default function HRProbationPage() {
 
   function resetForm() {
     setSelectedForm(null);
+    setRound(1);
     setScores({
       workQuality: 0,
       discipline: 0,
@@ -248,6 +251,7 @@ export default function HRProbationPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           formId: selectedForm.id,
+          round,
           ...scores,
           result,
           notes,
@@ -452,10 +456,39 @@ export default function HRProbationPage() {
             )}
           </div>
 
+          {/* Round selector */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-4 text-base font-semibold text-gray-900">
+              2. เลือกครั้งที่ประเมิน
+            </h2>
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRound(r)}
+                  className={`flex flex-col items-center justify-center gap-1 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-all ${
+                    round === r
+                      ? "border-green-600 bg-green-600 text-white"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-green-300"
+                  }`}
+                >
+                  <span className="text-lg font-bold">ครั้งที่ {r}</span>
+                  {r === 3 && <span className="text-xs">ประเมินสุดท้าย</span>}
+                </button>
+              ))}
+            </div>
+            {round === 3 && (
+              <p className="mt-3 text-xs text-green-700">
+                💡 หากผ่านครั้งที่ 3 จะบรรจุเป็นพนักงานทันที
+              </p>
+            )}
+          </div>
+
           {/* Scoring */}
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-base font-semibold text-gray-900">
-              2. ให้คะแนน (1-5)
+              3. ให้คะแนน (1-5)
             </h2>
 
             <div className="space-y-4">
@@ -491,7 +524,7 @@ export default function HRProbationPage() {
           {/* Result */}
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-base font-semibold text-gray-900">
-              3. ผลการประเมิน
+              4. ผลการประเมิน
             </h2>
             <div className="grid grid-cols-2 gap-3">
               <button

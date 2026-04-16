@@ -645,6 +645,7 @@ model ProbationEvaluation {
   formId          String
   evaluatorId     String?
   evaluationDate  DateTime        @db.Date
+  round           Int             @default(1)
   workQuality     Int?
   discipline      Int?
   teamwork        Int?

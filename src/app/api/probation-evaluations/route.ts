@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       formId,
+      round,
       workQuality,
       discipline,
       teamwork,
@@ -92,11 +93,14 @@ export async function POST(request: NextRequest) {
 
     const evalDate = evaluationDate ? new Date(evaluationDate) : new Date();
 
+    const roundNum = typeof round === "number" ? round : parseInt(round || "1") || 1;
+
     const evaluation = await prisma.probationEvaluation.create({
       data: {
         formId,
         evaluatorId,
         evaluationDate: evalDate,
+        round: roundNum,
         workQuality: workQuality != null ? Number(workQuality) : null,
         discipline: discipline != null ? Number(discipline) : null,
         teamwork: teamwork != null ? Number(teamwork) : null,
@@ -109,16 +113,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // If result is PASS, update status to HIRED; if FAIL, REJECTED
-    if (result === "PASS") {
-      await prisma.applicationForm.update({
-        where: { id: formId },
-        data: { status: "HIRED" },
-      });
-    } else if (result === "FAIL") {
+    // Status transitions:
+    // - FAIL at any round → REJECTED
+    // - PASS at round 3 (final) → HIRED (บรรจุเป็นพนักงาน)
+    // - PASS at round 1 or 2 → stay in PROBATION (ทดลองงานต่อ)
+    if (result === "FAIL") {
       await prisma.applicationForm.update({
         where: { id: formId },
         data: { status: "REJECTED" },
+      });
+    } else if (result === "PASS" && roundNum >= 3) {
+      await prisma.applicationForm.update({
+        where: { id: formId },
+        data: { status: "HIRED" },
       });
     }
 
