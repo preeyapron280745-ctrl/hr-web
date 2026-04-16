@@ -8,10 +8,18 @@ export async function middleware(request: NextRequest) {
 
   // Public routes - no auth required
   if (
+    pathname === "/" ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
+    pathname.startsWith("/apply") ||
+    pathname.startsWith("/jobs") ||
+    pathname.startsWith("/success") ||
+    pathname.startsWith("/unauthorized") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/jobs") ||
+    pathname.startsWith("/api/forms") ||
+    pathname.startsWith("/api/reference") ||
+    pathname.startsWith("/api/upload") ||
     pathname.startsWith("/api/applications") && request.method === "POST" ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon")

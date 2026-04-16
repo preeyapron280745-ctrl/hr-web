@@ -43,11 +43,12 @@ model Department {
 }
 
 model JobPosition {
-  id           String      @id @default(cuid())
+  id           String       @id @default(cuid())
   title        String
-  department   Department  @relation(fields: [departmentId], references: [id])
+  department   Department   @relation(fields: [departmentId], references: [id])
   departmentId String
-  active       Boolean     @default(true)
+  company      Company?
+  active       Boolean      @default(true)
   jobPostings  JobPosting[]
 }
 
@@ -69,8 +70,7 @@ model JobPosting {
   createdById    String
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-
-  applications Application[]
+  applications   Application[]
 }
 
 enum EmploymentType {
@@ -84,6 +84,12 @@ enum PostingStatus {
   DRAFT
   PUBLISHED
   CLOSED
+}
+
+enum Company {
+  COMETS_HQ
+  COMETS_FACTORY
+  ICT
 }
 
 // ============ APPLICANT ============
@@ -143,8 +149,6 @@ enum MaritalStatus {
   DIVORCED
   WIDOWED
 }
-
-// ============ APPLICANT DETAILS ============
 
 model Education {
   id          String    @id @default(cuid())
@@ -411,4 +415,231 @@ enum OfferStatus {
   ACCEPTED
   DECLINED
   EXPIRED
+}
+
+// ============ APPLICATION FORM (Public Multi-step Form) ============
+
+model Hospital {
+  id     String  @id @default(cuid())
+  name   String
+  active Boolean @default(true)
+}
+
+model Province {
+  id   String @id @default(cuid())
+  name String @unique
+}
+
+enum EmployeeType {
+  MONTHLY
+  DAILY
+  INTERN
+}
+
+enum FormStatus {
+  DRAFT
+  SUBMITTED
+}
+
+model ApplicationForm {
+  id                       String               @id @default(cuid())
+  status                   FormStatus           @default(DRAFT)
+  employeeType             EmployeeType
+  company                  Company
+  positionId               String?
+  positionTitle            String
+  sourceOfInfo             String[]
+  sourceOfInfoOther        String?
+  referredBy               String?
+  incomeTypes              String[]
+  currentSalary            Float?
+  otAllowance              Float?
+  shiftAllowance           Float?
+  positionAllowance        Float?
+  foodAllowance            Float?
+  travelAllowance          Float?
+  bonusYearly              Float?
+  expectedSalaryMin        Float?
+  expectedSalaryMax        Float?
+  availableStartDate       DateTime?            @db.Date
+  lastYearExperience       String?
+  internStartDate          DateTime?            @db.Date
+  internEndDate            DateTime?            @db.Date
+  internDepartment         String?
+  photoUrl                 String?
+  resumeUrl                String?
+  titleTh                  String?
+  firstNameTh              String?
+  lastNameTh               String?
+  titleEn                  String?
+  firstNameEn              String?
+  lastNameEn               String?
+  nicknameTh               String?
+  nicknameEn               String?
+  phone                    String?
+  dateOfBirth              DateTime?            @db.Date
+  age                      Int?
+  birthProvince            String?
+  nationality              String?
+  ethnicity                String?
+  religion                 String?
+  height                   Float?
+  weight                   Float?
+  email                    String?
+  lineId                   String?
+  currentAddress           String?
+  permanentAddress         String?
+  socialSecurityStatus     String?
+  hospitalWithSS           String?
+  hospitalWithSSOther      String?
+  hospitalNoSS             String?
+  hospitalNoSSOther        String?
+  maritalStatus            String?
+  spouseTitle              String?
+  spouseName               String?
+  spouseOccupation         String?
+  spouseWorkplace          String?
+  spousePhone              String?
+  numChildren              Int?
+  fatherTitle              String?
+  fatherName               String?
+  fatherStatus             String?
+  fatherAge                Int?
+  fatherOccupation         String?
+  fatherPhone              String?
+  motherTitle              String?
+  motherName               String?
+  motherStatus             String?
+  motherAge                Int?
+  motherOccupation         String?
+  motherPhone              String?
+  siblings                 Int?
+  childOrder               Int?
+  educationLevels          String[]
+  educationData            Json?
+  internStudyYear          String?
+  internGpa                Float?
+  internInstitution        String?
+  internFaculty            String?
+  internMajor              String?
+  advisorTitle             String?
+  advisorName              String?
+  advisorPhone             String?
+  advisorEmail             String?
+  computerSkills           String[]
+  excelSkills              String[]
+  excelSkillsOther         String?
+  wordSkills               String[]
+  wordSkillsOther          String?
+  powerpointSkills         String[]
+  powerpointSkillsOther    String?
+  photoshopSkills          String[]
+  photoshopSkillsOther     String?
+  otherSkills              String?
+  interestedWork           String?
+  travelMode               String?
+  shuttleRoute             String?
+  canDriveCar              String?
+  carLicenseNumber         String?
+  hasCar                   String?
+  carPlate                 String?
+  canDriveMotorcycle       String?
+  motorcycleLicenseNumber  String?
+  hasMotorcycle            String?
+  motorcyclePlate          String?
+  firedForMisconduct       String?
+  firedReason              String?
+  smoke                    String?
+  smokeReason              String?
+  smokeFrequency           String?
+  alcohol                  String?
+  alcoholReason            String?
+  alcoholFrequency         String?
+  drugs                    String?
+  drugsReason              String?
+  seriousInjury            String?
+  injuryDetail             String?
+  chronicDisease           String?
+  chronicDiseaseDetail     String?
+  seriousDisease           String?
+  seriousDiseaseDetail     String?
+  surgery                  String?
+  surgeryDetail            String?
+  firedForRule             String?
+  firedRuleReason          String?
+  jailed                   String?
+  jailedReason             String?
+  debtLawsuit              String?
+  debtReason               String?
+  healthy                  String?
+  disabilityDetail         String?
+  pregnant                 String?
+  pregnancyWeeks           String?
+  severeMenstrualPain      String?
+  mentalIllness            String?
+  mentalIllnessDetail      String?
+  wifePregnant             String?
+  wifePregnancyWeeks       String?
+  emTitle1                 String?
+  emName1                  String?
+  emRelation1              String?
+  emPhone1                 String?
+  emTitle2                 String?
+  emName2                  String?
+  emRelation2              String?
+  emPhone2                 String?
+  allowPrevEmployerContact String?
+  allowPrevEmployerReason  String?
+  nonRelRelation           String?
+  nonRelTitle              String?
+  nonRelName               String?
+  nonRelAddress            String?
+  nonRelPhone              String?
+  nonRelPosition           String?
+  consent1                 String?
+  consentSignerTitle       String?
+  consentSignerName        String?
+  consent2                 String?
+  submittedAt              DateTime?
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+
+  trainings        TrainingItem[]
+  workExperiences  WorkExperienceItem[]
+  languages        LanguageItem[]
+}
+
+model TrainingItem {
+  id          String          @id @default(cuid())
+  form        ApplicationForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  formId      String
+  courseName  String
+  institution String?
+  year        Int?
+  duration    String?
+  certificate Boolean         @default(false)
+}
+
+model WorkExperienceItem {
+  id               String          @id @default(cuid())
+  form             ApplicationForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  formId           String
+  company          String
+  position         String
+  startDate        DateTime?       @db.Date
+  endDate          DateTime?       @db.Date
+  salary           Float?
+  reasonForLeaving String?
+  responsibilities String?
+}
+
+model LanguageItem {
+  id        String          @id @default(cuid())
+  form      ApplicationForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  formId    String
+  language  String
+  speaking  String?
+  reading   String?
+  writing   String?
+  listening String?
 }
