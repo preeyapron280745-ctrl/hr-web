@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Briefcase, Mail, Lock, LogIn, Loader2 } from "lucide-react";
@@ -30,7 +30,12 @@ export default function StaffLoginPage() {
       if (result?.error) {
         setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
       } else {
-        router.push("/dashboard");
+        const session = await getSession();
+        const role = (session?.user as any)?.role;
+        if (role === "ADMIN") router.push("/admin/dashboard");
+        else if (role === "HR") router.push("/hr/dashboard");
+        else if (role === "MANAGER") router.push("/manager/dashboard");
+        else router.push("/");
         router.refresh();
       }
     } catch {
