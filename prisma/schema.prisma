@@ -1,0 +1,414 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============ AUTHENTICATION & USERS ============
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  password   String
+  name       String
+  role       Role     @default(HR)
+  department String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  jobPostings  JobPosting[]
+  screenings   Screening[]
+  interviews   Interview[]
+  approvals    Approval[]
+}
+
+enum Role {
+  ADMIN
+  HR
+  MANAGER
+}
+
+// ============ JOB STRUCTURE ============
+
+model Department {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  active    Boolean       @default(true)
+  positions JobPosition[]
+}
+
+model JobPosition {
+  id           String      @id @default(cuid())
+  title        String
+  department   Department  @relation(fields: [departmentId], references: [id])
+  departmentId String
+  active       Boolean     @default(true)
+  jobPostings  JobPosting[]
+}
+
+model JobPosting {
+  id             String         @id @default(cuid())
+  title          String
+  position       JobPosition    @relation(fields: [positionId], references: [id])
+  positionId     String
+  description    String         @db.Text
+  requirements   String         @db.Text
+  salary         String?
+  employmentType EmploymentType @default(FULL_TIME)
+  locationText   String?
+  openings       Int            @default(1)
+  status         PostingStatus  @default(DRAFT)
+  publishedAt    DateTime?
+  closingDate    DateTime?
+  createdBy      User           @relation(fields: [createdById], references: [id])
+  createdById    String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  applications Application[]
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum PostingStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+// ============ APPLICANT ============
+
+model Applicant {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  password        String
+  titleTh         String?
+  firstNameTh     String
+  lastNameTh      String
+  titleEn         String?
+  firstNameEn     String?
+  lastNameEn      String?
+  idCardNumber    String?
+  dateOfBirth     DateTime?
+  nationality     String?
+  ethnicity       String?
+  religion        String?
+  gender          Gender?
+  maritalStatus   MaritalStatus?
+  militaryStatus  String?
+  height          Float?
+  weight          Float?
+  currentAddress  String?       @db.Text
+  currentProvince String?
+  currentPostcode String?
+  permanentAddress  String?     @db.Text
+  permanentProvince String?
+  permanentPostcode String?
+  phone           String?
+  lineId          String?
+  photoUrl        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  applications      Application[]
+  educations        Education[]
+  workExperiences   WorkExperience[]
+  skills            ApplicantSkill[]
+  languages         LanguageSkill[]
+  trainings         Training[]
+  references        Reference[]
+  emergencyContacts EmergencyContact[]
+  documents         Document[]
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+// ============ APPLICANT DETAILS ============
+
+model Education {
+  id          String    @id @default(cuid())
+  applicant   Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId String
+  level       String
+  institution String
+  faculty     String?
+  major       String?
+  gpa         Float?
+  startYear   Int?
+  endYear     Int?
+  degree      String?
+}
+
+model WorkExperience {
+  id               String    @id @default(cuid())
+  applicant        Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId      String
+  company          String
+  position         String
+  department       String?
+  startDate        DateTime?
+  endDate          DateTime?
+  salary           Float?
+  reasonForLeaving String?
+  responsibilities String?   @db.Text
+}
+
+model ApplicantSkill {
+  id          String    @id @default(cuid())
+  applicant   Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId String
+  category    String
+  name        String
+  proficiency String?
+  detail      String?
+}
+
+model LanguageSkill {
+  id          String    @id @default(cuid())
+  applicant   Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId String
+  language    String
+  speaking    String?
+  reading     String?
+  writing     String?
+  listening   String?
+}
+
+model Training {
+  id          String    @id @default(cuid())
+  applicant   Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId String
+  courseName  String
+  institution String?
+  year        Int?
+  duration    String?
+  certificate Boolean  @default(false)
+}
+
+model Reference {
+  id           String    @id @default(cuid())
+  applicant    Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId  String
+  name         String
+  relationship String?
+  position     String?
+  company      String?
+  phone        String?
+  email        String?
+}
+
+model EmergencyContact {
+  id           String    @id @default(cuid())
+  applicant    Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId  String
+  name         String
+  relationship String?
+  phone        String
+  address      String?
+}
+
+model Document {
+  id          String       @id @default(cuid())
+  applicant   Applicant    @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  applicantId String
+  type        DocumentType
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  uploadedAt  DateTime     @default(now())
+}
+
+enum DocumentType {
+  RESUME
+  ID_CARD
+  HOUSE_REGISTRATION
+  EDUCATION_CERT
+  TRANSCRIPT
+  PHOTO
+  WORK_CERT
+  TRAINING_CERT
+  OTHER
+}
+
+// ============ APPLICATION PIPELINE ============
+
+model Application {
+  id             String            @id @default(cuid())
+  applicant      Applicant         @relation(fields: [applicantId], references: [id])
+  applicantId    String
+  jobPosting     JobPosting        @relation(fields: [jobPostingId], references: [id])
+  jobPostingId   String
+  status         ApplicationStatus @default(APPLIED)
+  coverLetter    String?           @db.Text
+  expectedSalary Float?
+  availableDate  DateTime?
+  source         String?
+  notes          String?           @db.Text
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  screening     Screening?
+  interviews    Interview[]
+  approval      Approval?
+  offer         Offer?
+  statusHistory StatusHistory[]
+
+  @@unique([applicantId, jobPostingId])
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SCREENING
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  PENDING_APPROVAL
+  APPROVED
+  OFFER_SENT
+  OFFER_ACCEPTED
+  HIRED
+  REJECTED
+  WITHDRAWN
+}
+
+model StatusHistory {
+  id            String             @id @default(cuid())
+  application   Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationId String
+  fromStatus    ApplicationStatus?
+  toStatus      ApplicationStatus
+  changedBy     String?
+  note          String?
+  createdAt     DateTime           @default(now())
+}
+
+model Screening {
+  id                 String          @id @default(cuid())
+  application        Application     @relation(fields: [applicationId], references: [id])
+  applicationId      String          @unique
+  screenedBy         User            @relation(fields: [screenedById], references: [id])
+  screenedById       String
+  result             ScreeningResult
+  qualificationMatch Boolean         @default(false)
+  experienceMatch    Boolean         @default(false)
+  salaryMatch        Boolean         @default(false)
+  notes              String?         @db.Text
+  screenedAt         DateTime        @default(now())
+}
+
+enum ScreeningResult {
+  PASS
+  FAIL
+  HOLD
+}
+
+model Interview {
+  id             String                   @id @default(cuid())
+  application    Application              @relation(fields: [applicationId], references: [id])
+  applicationId  String
+  round          Int                      @default(1)
+  type           InterviewType            @default(ONSITE)
+  scheduledDate  DateTime
+  scheduledTime  String
+  duration       Int                      @default(60)
+  location       String?
+  meetingLink    String?
+  interviewer    User                     @relation(fields: [interviewerId], references: [id])
+  interviewerId  String
+  status         InterviewStatus          @default(SCHEDULED)
+  rating         Int?
+  strengths      String?                  @db.Text
+  weaknesses     String?                  @db.Text
+  recommendation InterviewRecommendation?
+  notes          String?                  @db.Text
+  completedAt    DateTime?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+}
+
+enum InterviewType {
+  ONSITE
+  ONLINE
+  PHONE
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum InterviewRecommendation {
+  STRONGLY_RECOMMEND
+  RECOMMEND
+  NEUTRAL
+  NOT_RECOMMEND
+}
+
+model Approval {
+  id                String           @id @default(cuid())
+  application       Application      @relation(fields: [applicationId], references: [id])
+  applicationId     String           @unique
+  approvedBy        User             @relation(fields: [approvedById], references: [id])
+  approvedById      String
+  decision          ApprovalDecision
+  proposedSalary    Float?
+  proposedStartDate DateTime?
+  notes             String?          @db.Text
+  decidedAt         DateTime         @default(now())
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+  REVISION_NEEDED
+}
+
+model Offer {
+  id             String      @id @default(cuid())
+  application    Application @relation(fields: [applicationId], references: [id])
+  applicationId  String      @unique
+  position       String
+  department     String
+  salary         Float
+  startDate      DateTime
+  benefits       String?     @db.Text
+  conditions     String?     @db.Text
+  offerLetterUrl String?
+  contractUrl    String?
+  status         OfferStatus @default(PENDING)
+  sentAt         DateTime?
+  respondedAt    DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+enum OfferStatus {
+  PENDING
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
