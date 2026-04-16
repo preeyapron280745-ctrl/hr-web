@@ -6,12 +6,9 @@ import {
   LayoutDashboard,
   FilePlus,
   FileText,
-  FileSearch,
   Briefcase,
   ClipboardList,
-  UserCheck,
   Award,
-  CalendarCheck,
   UserX,
 } from "lucide-react";
 
@@ -19,13 +16,10 @@ const hrMenuItems: MenuItem[] = [
   { label: "Dashboard รวม", href: "/hr/dashboard", icon: LayoutDashboard },
   { label: "From Resume", href: "/hr/from-resume", icon: FilePlus },
   { label: "Resume", href: "/hr/resume", icon: FileText },
-  { label: "ข้อมูล Resume", href: "/hr/resume-data", icon: FileSearch },
   { label: "ตำแหน่งงาน", href: "/hr/postings", icon: Briefcase },
   { label: "Form ใบสมัคร", href: "/apply", icon: ClipboardList },
   { label: "ใบสมัครงาน (HR)", href: "/hr/applications", icon: FileText },
-  { label: "ใบประเมินสัมภาษณ์", href: "/hr/interviews", icon: UserCheck },
   { label: "ใบประเมินทดลองงาน", href: "/hr/probation", icon: Award },
-  { label: "สัมภาษณ์", href: "/hr/schedule", icon: CalendarCheck },
   { label: "ไม่ผ่าน/ปฏิเสธ", href: "/hr/rejected", icon: UserX },
 ];
 
