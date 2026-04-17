@@ -49,6 +49,9 @@ export async function GET() {
     const evalWhere: any =
       formIdsForManager !== null ? { formId: { in: formIdsForManager } } : undefined;
 
+    // Application statuses (ใบสมัครจริง — ไม่รวม TANK/RESUME/DRAFT)
+    const appStatuses = ["SUBMITTED", "SCREENING", "INTERVIEW_SCHEDULED", "INTERVIEWED", "PROBATION", "HIRED", "REJECTED"] as any[];
+
     const [
       resumes,
       applications,
@@ -60,28 +63,33 @@ export async function GET() {
       totalDepartments,
       totalPositions,
     ] = await Promise.all([
+      // Resume = เฉพาะ status RESUME
       prisma.applicationForm.count({
-        where: { ...baseWhere, resumeUrl: { not: null } },
+        where: { ...baseWhere, status: "RESUME" as any },
       }),
+      // ใบสมัครงาน = เฉพาะ SUBMITTED ขึ้นไป (ไม่รวม TANK/RESUME/DRAFT)
       prisma.applicationForm.count({
-        where: { ...baseWhere, status: { not: "DRAFT" } },
+        where: { ...baseWhere, status: { in: appStatuses } },
       }),
       prisma.interviewEvaluation.count({ where: evalWhere }),
       prisma.probationEvaluation.count({ where: evalWhere }),
+      // Pipeline — เฉพาะใบสมัครจริง
       prisma.applicationForm.groupBy({
         by: ["status"],
         _count: { _all: true },
-        where: { ...baseWhere, status: { not: "DRAFT" } },
+        where: { ...baseWhere, status: { in: appStatuses } },
       }),
+      // แยกบริษัท — เฉพาะใบสมัครจริง
       prisma.applicationForm.groupBy({
         by: ["company"],
         _count: { _all: true },
-        where: { ...baseWhere, status: { not: "DRAFT" } },
+        where: { ...baseWhere, status: { in: appStatuses } },
       }),
+      // แยกประเภทพนักงาน — เฉพาะใบสมัครจริง
       prisma.applicationForm.groupBy({
         by: ["employeeType"],
         _count: { _all: true },
-        where: { ...baseWhere, status: { not: "DRAFT" } },
+        where: { ...baseWhere, status: { in: appStatuses } },
       }),
       user?.role === "MANAGER"
         ? Promise.resolve(1)
