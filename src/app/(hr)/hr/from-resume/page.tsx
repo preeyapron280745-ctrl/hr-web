@@ -40,7 +40,6 @@ export default function FromResumePage() {
   const router = useRouter();
   const [positions, setPositions] = useState<Position[]>([]);
   const [saving, setSaving] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,7 +58,10 @@ export default function FromResumePage() {
   const [gender, setGender] = useState<"" | "MALE" | "FEMALE">("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [educationLevel, setEducationLevel] = useState("");
+
+  // การศึกษา (multi-select + details)
+  const [eduLevels, setEduLevels] = useState<string[]>([]);
+  const [eduData, setEduData] = useState<Record<string, any>>({});
 
   // ประสบการณ์ล่าสุด
   const [lastCompany, setLastCompany] = useState("");
@@ -68,7 +70,6 @@ export default function FromResumePage() {
   const [lastSalaryMax, setLastSalaryMax] = useState("");
 
   // เอกสาร
-  const [photo, setPhoto] = useState<UploadedFile | null>(null);
   const [resume, setResume] = useState<UploadedFile | null>(null);
 
   useEffect(() => {
@@ -119,7 +120,7 @@ export default function FromResumePage() {
     if (!fullName.trim()) return setError("กรุณากรอกชื่อ - นามสกุล");
     if (!phone.trim()) return setError("กรุณากรอกเบอร์โทร");
     if (!email.trim()) return setError("กรุณากรอก Email");
-    if (!educationLevel) return setError("กรุณาเลือกระดับการศึกษา");
+    if (eduLevels.length === 0) return setError("กรุณาเลือกระดับการศึกษาอย่างน้อย 1 ระดับ");
     if (!lastCompany.trim()) return setError("กรุณากรอกบริษัทล่าสุด");
     if (!lastPosition.trim()) return setError("กรุณากรอกตำแหน่งล่าสุด");
     if (!resume) return setError("กรุณาอัปโหลด Resume");
@@ -152,12 +153,13 @@ export default function FromResumePage() {
         gender: gender || null,
         phone: phone.trim(),
         email: email.trim(),
-        educationLevelText: educationLevel,
+        educationLevels: eduLevels,
+        educationData: eduData,
+        educationLevelText: eduLevels.join(", "),
         lastCompany: lastCompany.trim(),
         lastPosition: lastPosition.trim(),
         lastSalaryMin: lastSalaryMin ? parseFloat(lastSalaryMin) : null,
         lastSalaryMax: lastSalaryMax ? parseFloat(lastSalaryMax) : null,
-        photoUrl: photo?.url ?? null,
         resumeUrl: resume.url,
       };
       const res = await fetch("/api/forms/submit", {
@@ -343,16 +345,64 @@ export default function FromResumePage() {
           </Field>
 
           <Field label="ระดับการศึกษา" required>
-            <select
-              value={educationLevel}
-              onChange={(e) => setEducationLevel(e.target.value)}
-              className={inputCls}
-              required
-            >
-              <option value="">-- เลือกระดับการศึกษา --</option>
-              {EDUCATION_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {eduLevels.map((lvl) => (
+                <span key={lvl} className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
+                  {lvl}
+                  <button type="button" onClick={() => { setEduLevels(eduLevels.filter(l => l !== lvl)); const d = {...eduData}; delete d[lvl]; setEduData(d); }} className="ml-1 text-green-500 hover:text-red-500">&times;</button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <select
+                value=""
+                onChange={(e) => { if (e.target.value && !eduLevels.includes(e.target.value)) { setEduLevels([...eduLevels, e.target.value]); } }}
+                className={inputCls}
+              >
+                <option value="">+ เพิ่มระดับการศึกษา</option>
+                {EDUCATION_LEVELS.filter(l => !eduLevels.includes(l)).map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
           </Field>
+
+          {/* Education detail per level */}
+          {eduLevels.map((lvl) => (
+            <div key={lvl} className="rounded-lg border border-green-200 bg-green-50/50 p-4 ml-[180px] sm:ml-0">
+              <h4 className="mb-3 font-semibold text-green-700 text-sm">{lvl}</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">ชื่อสถานศึกษา *</label>
+                  <input type="text" value={eduData[lvl]?.institution || ""} onChange={(e) => setEduData({...eduData, [lvl]: {...(eduData[lvl]||{}), institution: e.target.value}})} className={inputCls} />
+                </div>
+                {(lvl.includes("ปริญญา")) && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">คณะ *</label>
+                    <input type="text" value={eduData[lvl]?.faculty || ""} onChange={(e) => setEduData({...eduData, [lvl]: {...(eduData[lvl]||{}), faculty: e.target.value}})} className={inputCls} />
+                  </div>
+                )}
+                {!lvl.includes("ประถม") && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">สาขาวิชา *</label>
+                    <input type="text" value={eduData[lvl]?.major || ""} onChange={(e) => setEduData({...eduData, [lvl]: {...(eduData[lvl]||{}), major: e.target.value}})} className={inputCls} />
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">เริ่มปี พ.ศ. *</label>
+                    <input type="number" value={eduData[lvl]?.startYear || ""} onChange={(e) => setEduData({...eduData, [lvl]: {...(eduData[lvl]||{}), startYear: e.target.value}})} className={inputCls} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">สำเร็จปี พ.ศ. *</label>
+                    <input type="number" value={eduData[lvl]?.endYear || ""} onChange={(e) => setEduData({...eduData, [lvl]: {...(eduData[lvl]||{}), endYear: e.target.value}})} className={inputCls} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">เกรดเฉลี่ย *</label>
+                    <input type="number" step="0.01" value={eduData[lvl]?.gpa || ""} onChange={(e) => setEduData({...eduData, [lvl]: {...(eduData[lvl]||{}), gpa: e.target.value}})} className={inputCls} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
 
           <Field label="บริษัทล่าสุด" required>
             <input
@@ -393,16 +443,6 @@ export default function FromResumePage() {
               className={inputCls}
               min={0}
               required
-            />
-          </Field>
-
-          <Field label="รูปถ่าย">
-            <FileField
-              value={photo}
-              uploading={uploadingPhoto}
-              accept="image/*"
-              onChange={(file) => uploadFile(file, "photos", setPhoto, setUploadingPhoto)}
-              onClear={() => setPhoto(null)}
             />
           </Field>
 
