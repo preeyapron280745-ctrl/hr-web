@@ -45,17 +45,54 @@ export async function GET(request: NextRequest) {
       where.resumeUrl = null;
     }
 
-    // Manager: filter by their department
-    if (user?.role === "MANAGER" && user.department) {
-      const dept = await prisma.department.findUnique({
-        where: { name: user.department },
-        select: { positions: { select: { id: true } } },
-      });
-      const positionIds = dept?.positions.map((p) => p.id) || [];
-      if (positionIds.length === 0) {
-        return NextResponse.json([]);
+    // Manager: filter access
+    if (user?.role === "MANAGER") {
+      const userName = (user as any)?.name || "";
+
+      if (status === "RESUME") {
+        // Resume page: Manager sees only resumes sent to them (reviewer1/2/3 matches their name)
+        // Find matching reviewer nicknames for this user
+        const reviewerNames: string[] = [];
+        if (userName) {
+          reviewerNames.push(userName);
+          // Also check Reviewer table for nickname matches
+          const matchingReviewers = await (prisma as any).reviewer.findMany({
+            where: {
+              OR: [
+                { name: { contains: userName, mode: "insensitive" } },
+                { nickname: { contains: userName, mode: "insensitive" } },
+              ],
+            },
+            select: { name: true, nickname: true },
+          });
+          matchingReviewers.forEach((r: any) => {
+            if (r.nickname) reviewerNames.push(r.nickname);
+            if (r.name) reviewerNames.push(r.name);
+          });
+        }
+
+        if (reviewerNames.length > 0) {
+          where.OR = [
+            ...(where.OR || []),
+            { reviewer1: { in: reviewerNames } },
+            { reviewer2: { in: reviewerNames } },
+            { reviewer3: { in: reviewerNames } },
+          ];
+        } else {
+          return NextResponse.json([]);
+        }
+      } else if (user.department) {
+        // Other pages: filter by department
+        const dept = await prisma.department.findUnique({
+          where: { name: user.department },
+          select: { positions: { select: { id: true } } },
+        });
+        const positionIds = dept?.positions.map((p) => p.id) || [];
+        if (positionIds.length === 0) {
+          return NextResponse.json([]);
+        }
+        where.positionId = { in: positionIds };
       }
-      where.positionId = { in: positionIds };
     }
 
     if (q && q.trim().length > 0) {
