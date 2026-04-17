@@ -27,7 +27,7 @@ function fullName(f: ResumeForm) { return [f.firstNameTh, f.lastNameTh].filter(B
 function getStatusLabel(f: ResumeForm) {
   if (f.reviewerStatus1 === "สนใจ") return "สนใจ - นัดสัมภาษณ์";
   if (f.reviewerStatus1 === "ไม่สนใจ") return "ไม่สนใจ";
-  if (f.reviewer1) return "รอพิจารณา";
+  if (f.reviewer1) return `รอพิจารณา (${f.reviewer1})`;
   return "รอส่งข้อมูล";
 }
 function getStatusColor(f: ResumeForm) {

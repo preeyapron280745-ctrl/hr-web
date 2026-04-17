@@ -26,9 +26,9 @@ const INTERVIEW_TIMES = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00"
 
 function fullName(f: ResumeForm) { return [f.firstNameTh, f.lastNameTh].filter(Boolean).join(" ") || "(ไม่ระบุ)"; }
 function getStatusLabel(f: ResumeForm) {
-  if (f.tankStatus === "รอพิจารณา คนที่ 1" && f.reviewerStatus1 === "สนใจ") return "สนใจ - นัดสัมภาษณ์";
-  if (f.tankStatus === "รอพิจารณา คนที่ 1" && f.reviewerStatus1 === "ไม่สนใจ") return "ไม่สนใจ";
-  if (f.reviewer1) return "รอพิจารณา คนที่ 1";
+  if (f.reviewerStatus1 === "สนใจ") return "สนใจ - นัดสัมภาษณ์";
+  if (f.reviewerStatus1 === "ไม่สนใจ") return "ไม่สนใจ";
+  if (f.reviewer1) return `รอพิจารณา (${f.reviewer1})`;
   return "รอส่งข้อมูล";
 }
 function getStatusColor(f: ResumeForm) {
