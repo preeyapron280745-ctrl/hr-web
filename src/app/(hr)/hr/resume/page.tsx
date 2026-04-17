@@ -11,7 +11,6 @@ import {
   UserCircle,
   Send,
   CheckCircle2,
-  X,
 } from "lucide-react";
 import { COMPANIES, EMPLOYEE_TYPES } from "@/lib/form-constants";
 import { formatDate } from "@/lib/utils";
@@ -36,12 +35,11 @@ interface ResumeForm {
   createdAt: string;
 }
 
-interface Manager {
+interface Reviewer {
   id: string;
   name: string;
-  username: string | null;
-  department: string | null;
-  role: string;
+  nickname: string | null;
+  email: string | null;
 }
 
 const COMPANY_SHORT: Record<string, string> = {
@@ -67,21 +65,21 @@ function getStatusColor(f: ResumeForm) {
 export default function HRResumePage() {
   const [forms, setForms] = useState<ResumeForm[]>([]);
   const [loading, setLoading] = useState(true);
-  const [managers, setManagers] = useState<Manager[]>([]);
+  const [managers, setReviewers] = useState<Reviewer[]>([]);
   const [company, setCompany] = useState("");
   const [employeeType, setEmployeeType] = useState("");
   const [q, setQ] = useState("");
 
   // Send modal
   const [sendTarget, setSendTarget] = useState<ResumeForm | null>(null);
-  const [selectedManager, setSelectedManager] = useState("");
-  const [managerSearch, setManagerSearch] = useState("");
+  const [selectedReviewer, setSelectedReviewer] = useState("");
+  const [managerSearch, setReviewerSearch] = useState("");
   const [sending, setSending] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
   useEffect(() => {
     fetchForms();
-    fetch("/api/users").then(r => r.json()).then(d => setManagers(Array.isArray(d) ? d : [])).catch(() => {});
+    fetch("/api/reviewers").then(r => r.json()).then(d => setReviewers(Array.isArray(d) ? d : [])).catch(() => {});
   }, []);
 
   useEffect(() => { fetchForms(); }, [company, employeeType, q]);
@@ -100,17 +98,17 @@ export default function HRResumePage() {
     finally { setLoading(false); }
   };
 
-  const filteredManagers = useMemo(() => {
+  const filteredReviewers = useMemo(() => {
     const s = managerSearch.trim().toLowerCase();
     return managers.filter(m => {
       if (!s) return true;
-      return m.name.toLowerCase().includes(s) || (m.department || "").toLowerCase().includes(s) || (m.username || "").toLowerCase().includes(s);
+      return m.name.toLowerCase().includes(s) || (m.nickname || "").toLowerCase().includes(s) || (m.email || "").toLowerCase().includes(s);
     });
   }, [managers, managerSearch]);
 
   const handleSend = async () => {
-    if (!sendTarget || !selectedManager) return;
-    const mgr = managers.find(m => m.id === selectedManager);
+    if (!sendTarget || !selectedReviewer) return;
+    const mgr = managers.find(m => m.id === selectedReviewer);
     setSending(true);
     try {
       const res = await fetch(`/api/application-forms/${sendTarget.id}`, {
@@ -132,8 +130,8 @@ export default function HRResumePage() {
 
       setSuccessMsg(`ส่งข้อมูล "${fullName(sendTarget)}" ให้ ${mgr?.name} พิจารณาแล้ว`);
       setSendTarget(null);
-      setSelectedManager("");
-      setManagerSearch("");
+      setSelectedReviewer("");
+      setReviewerSearch("");
       await fetchForms();
       setTimeout(() => setSuccessMsg(""), 4000);
     } catch (e) {
@@ -237,7 +235,7 @@ export default function HRResumePage() {
                   </a>
                 )}
                 {!f.reviewer1 && (
-                  <button onClick={() => { setSendTarget(f); setSelectedManager(""); setManagerSearch(""); }} className="flex flex-1 items-center justify-center gap-1.5 border-l border-gray-100 py-3 text-sm font-semibold text-green-600 hover:bg-green-50 hover:text-green-700">
+                  <button onClick={() => { setSendTarget(f); setSelectedReviewer(""); setReviewerSearch(""); }} className="flex flex-1 items-center justify-center gap-1.5 border-l border-gray-100 py-3 text-sm font-semibold text-green-600 hover:bg-green-50 hover:text-green-700">
                     <Send className="h-4 w-4" />
                     ส่งข้อมูล
                   </button>
@@ -257,7 +255,7 @@ export default function HRResumePage() {
               <h3 className="text-lg font-semibold text-gray-900">Form Resume ส่งข้อมูล</h3>
               <div className="flex gap-2">
                 <button onClick={() => setSendTarget(null)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">ยกเลิก</button>
-                <button onClick={handleSend} disabled={!selectedManager || sending} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
+                <button onClick={handleSend} disabled={!selectedReviewer || sending} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
                   {sending ? "กำลังส่ง..." : "บันทึก"}
                 </button>
               </div>
@@ -276,31 +274,31 @@ export default function HRResumePage() {
                 <input
                   type="text"
                   value={managerSearch}
-                  onChange={e => setManagerSearch(e.target.value)}
+                  onChange={e => setReviewerSearch(e.target.value)}
                   placeholder="Search"
                   className="w-full rounded-lg border border-green-500 bg-white pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-100"
                 />
               </div>
 
               <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200">
-                {filteredManagers.map(m => (
+                {filteredReviewers.map(m => (
                   <button
                     key={m.id}
-                    onClick={() => setSelectedManager(m.id)}
+                    onClick={() => setSelectedReviewer(m.id)}
                     className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors ${
-                      selectedManager === m.id
+                      selectedReviewer === m.id
                         ? "bg-green-100 text-green-800 font-medium"
                         : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     <div>
-                      <span>{m.name}</span>
-                      {m.department && <span className="ml-2 text-xs text-gray-400">({m.department})</span>}
+                      <span>{m.nickname || m.name}</span>
+                      <span className="ml-2 text-xs text-gray-400">{m.name}</span>
                     </div>
-                    {selectedManager === m.id && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                    {selectedReviewer === m.id && <CheckCircle2 className="h-4 w-4 text-green-600" />}
                   </button>
                 ))}
-                {filteredManagers.length === 0 && (
+                {filteredReviewers.length === 0 && (
                   <p className="px-4 py-6 text-center text-sm text-gray-500">ไม่พบผู้พิจารณา</p>
                 )}
               </div>

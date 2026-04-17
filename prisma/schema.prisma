@@ -420,6 +420,14 @@ enum OfferStatus {
 
 // ============ APPLICATION FORM (Public Multi-step Form) ============
 
+model Reviewer {
+  id       String  @id @default(cuid())
+  name     String
+  nickname String?
+  email    String?
+  active   Boolean @default(true)
+}
+
 model Hospital {
   id     String  @id @default(cuid())
   name   String
