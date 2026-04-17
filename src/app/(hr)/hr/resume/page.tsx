@@ -16,6 +16,9 @@ interface ResumeForm {
   phone: string | null; email: string | null; resumeUrl: string | null;
   status: string; tankStatus: string | null;
   reviewer1: string | null; reviewerStatus1: string | null;
+  interviewSlot1Date?: string | null; interviewSlot1Time?: string | null; interviewSlot1Location?: string | null;
+  interviewSlot2Date?: string | null; interviewSlot2Time?: string | null; interviewSlot2Location?: string | null;
+  interviewSlot3Date?: string | null; interviewSlot3Time?: string | null; interviewSlot3Location?: string | null;
   submittedAt: string | null; createdAt: string;
 }
 
@@ -65,6 +68,12 @@ export default function HRResumePage() {
   // Reject modal (ไม่สนใจ)
   const [rejectTarget, setRejectTarget] = useState<ResumeForm | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+
+  // Confirm interview modal (HR คอนเฟิร์มวันสัมภาษณ์)
+  const [confirmTarget, setConfirmTarget] = useState<ResumeForm | null>(null);
+  const [confirmSlot, setConfirmSlot] = useState("1");
+  const [confirmReviewer, setConfirmReviewer] = useState("");
+  const [confirmPosition, setConfirmPosition] = useState("");
 
   const [processing, setProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -136,6 +145,27 @@ export default function HRResumePage() {
       setSuccessMsg(`แจ้งวันนัดสัมภาษณ์ "${fullName(interestTarget)}" เรียบร้อย`);
       setInterestTarget(null);
       setSlots([{ date: "", time: "", location: "ONSITE" }, { date: "", time: "", location: "" }, { date: "", time: "", location: "" }]);
+      await fetchForms();
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch { alert("เกิดข้อผิดพลาด"); }
+    finally { setProcessing(false); }
+  };
+
+  // คอนเฟิร์มวันสัมภาษณ์ → ส่งไปใบสัมภาษณ์
+  const handleConfirm = async () => {
+    if (!confirmTarget) return;
+    setProcessing(true);
+    try {
+      // Change status to INTERVIEW_SCHEDULED → ย้ายไปหน้าใบสมัครงาน + ใบสัมภาษณ์
+      await fetch(`/api/application-forms/${confirmTarget.id}/reviewer`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "INTERVIEW_SCHEDULED",
+          tankStatus: "คอนเฟิร์มวันสัมภาษณ์แล้ว",
+        }),
+      });
+      setSuccessMsg(`คอนเฟิร์มวันสัมภาษณ์ "${fullName(confirmTarget)}" เรียบร้อย — ส่งไปใบสัมภาษณ์แล้ว`);
+      setConfirmTarget(null);
       await fetchForms();
       setTimeout(() => setSuccessMsg(""), 4000);
     } catch { alert("เกิดข้อผิดพลาด"); }
@@ -269,6 +299,12 @@ export default function HRResumePage() {
                     </button>
                   </>
                 )}
+                {/* หัวหน้าแผนกสนใจแล้ว → HR คอนเฟิร์มวันสัมภาษณ์ */}
+                {f.reviewerStatus1 === "สนใจ" && (
+                  <button onClick={() => setConfirmTarget(f)} className="flex flex-1 items-center justify-center gap-1 border-l border-gray-100 py-2.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-50">
+                    <Calendar className="h-3.5 w-3.5" />คอนเฟิร์ม
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -378,6 +414,56 @@ export default function HRResumePage() {
               </div>
               <label className="mb-2 block text-sm font-medium text-gray-700">เหตุผลที่ไม่สนใจ Resume <span className="text-red-500">*</span></label>
               <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} rows={4} placeholder="ระบุเหตุผล..." className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: คอนเฟิร์มวันสัมภาษณ์ ===== */}
+      {confirmTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setConfirmTarget(null)}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 flex items-center justify-between border-b bg-white px-6 py-4">
+              <h3 className="text-lg font-semibold">คอนเฟิร์มวันนัดสัมภาษณ์</h3>
+              <div className="flex gap-2">
+                <button onClick={() => setConfirmTarget(null)} className="rounded-lg border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">ยกเลิก</button>
+                <button onClick={handleConfirm} disabled={processing} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">บันทึก</button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="rounded-lg bg-green-50 p-3">
+                <p className="font-medium">{fullName(confirmTarget)}</p>
+                <p className="text-xs text-gray-600">{confirmTarget.positionTitle} — {COMPANY_SHORT[confirmTarget.company]}</p>
+                <p className="mt-1 text-xs text-green-700">ผู้พิจารณา: {confirmTarget.reviewer1}</p>
+              </div>
+
+              <div>
+                <h4 className="mb-3 font-semibold text-gray-900">ช่วงเวลาที่หัวหน้าแผนกระบุ</h4>
+                <div className="space-y-2">
+                  {[
+                    { n: 1, d: confirmTarget.interviewSlot1Date, t: confirmTarget.interviewSlot1Time, l: confirmTarget.interviewSlot1Location },
+                    { n: 2, d: confirmTarget.interviewSlot2Date, t: confirmTarget.interviewSlot2Time, l: confirmTarget.interviewSlot2Location },
+                    { n: 3, d: confirmTarget.interviewSlot3Date, t: confirmTarget.interviewSlot3Time, l: confirmTarget.interviewSlot3Location },
+                  ].filter(s => s.d).map(s => (
+                    <label key={s.n} className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition ${confirmSlot === String(s.n) ? "border-green-600 bg-green-50" : "border-gray-200 hover:border-green-300"}`}>
+                      <input type="radio" name="slot" value={s.n} checked={confirmSlot === String(s.n)} onChange={() => setConfirmSlot(String(s.n))} className="h-4 w-4 accent-green-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">ช่วงเวลาที่ {s.n}</p>
+                        <p className="text-sm text-gray-600">
+                          {s.d ? formatDate(s.d) : "-"} เวลา {s.t || "-"} ({s.l || "-"})
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                  {!confirmTarget.interviewSlot1Date && (
+                    <p className="text-sm text-gray-500">หัวหน้าแผนกยังไม่ได้ระบุช่วงเวลา</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+                เมื่อคอนเฟิร์มแล้ว ใบสมัครจะย้ายไปหน้า <strong>ใบสมัครงาน (HR)</strong> สถานะ &quot;นัดสัมภาษณ์&quot; และหัวหน้าแผนกจะสามารถกรอก <strong>ใบประเมินสัมภาษณ์</strong> ได้
+              </div>
             </div>
           </div>
         </div>
