@@ -71,7 +71,7 @@ export default function JobDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function JobDetailPage() {
         <p className="mt-2 text-gray-500">ตำแหน่งงานนี้อาจถูกลบหรือปิดรับสมัครแล้ว</p>
         <Link
           href="/jobs"
-          className="mt-6 flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+          className="mt-6 flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700"
         >
           <ArrowLeft className="h-4 w-4" />
           กลับไปดูตำแหน่งงานทั้งหมด
@@ -96,11 +96,11 @@ export default function JobDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-blue-600">
+      <div className="bg-green-600">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
           <Link
             href="/jobs"
-            className="mb-4 inline-flex items-center gap-1 text-sm text-blue-100 hover:text-white"
+            className="mb-4 inline-flex items-center gap-1 text-sm text-green-100 hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             กลับไปดูตำแหน่งงานทั้งหมด
@@ -116,7 +116,7 @@ export default function JobDetailPage() {
               <h1 className="text-2xl font-bold text-white sm:text-3xl">
                 {job.title}
               </h1>
-              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-blue-100">
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-green-100">
                 <span className="flex items-center gap-1">
                   <Building2 className="h-4 w-4" />
                   {job.department}
@@ -171,7 +171,7 @@ export default function JobDetailPage() {
                 <ul className="space-y-2">
                   {job.requirements.map((req, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
                       <span>{req}</span>
                     </li>
                   ))}

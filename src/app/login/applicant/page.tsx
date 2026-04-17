@@ -104,12 +104,12 @@ export default function ApplicantLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-50 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-600">
               <Briefcase className="h-6 w-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">HR Recruit</span>
@@ -128,7 +128,7 @@ export default function ApplicantLoginPage() {
               }}
               className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === "login"
-                  ? "border-b-2 border-blue-600 text-blue-600"
+                  ? "border-b-2 border-green-600 text-green-600"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -142,7 +142,7 @@ export default function ApplicantLoginPage() {
               }}
               className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === "register"
-                  ? "border-b-2 border-blue-600 text-blue-600"
+                  ? "border-b-2 border-green-600 text-green-600"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -260,7 +260,7 @@ export default function ApplicantLoginPage() {
             เจ้าหน้าที่{" "}
             <Link
               href="/login"
-              className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+              className="font-medium text-green-600 hover:text-green-700 hover:underline"
             >
               เข้าสู่ระบบที่นี่
             </Link>

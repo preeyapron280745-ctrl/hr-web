@@ -33,9 +33,9 @@ export default function Stepper({ steps, currentStep, className }: StepperProps)
                 <div
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
-                    isCompleted && "bg-blue-600 text-white",
+                    isCompleted && "bg-green-600 text-white",
                     isCurrent &&
-                      "border-2 border-blue-600 bg-white text-blue-600",
+                      "border-2 border-green-600 bg-white text-green-600",
                     !isCompleted &&
                       !isCurrent &&
                       "border-2 border-gray-300 bg-white text-gray-400"
@@ -50,8 +50,8 @@ export default function Stepper({ steps, currentStep, className }: StepperProps)
                 <span
                   className={cn(
                     "hidden text-xs font-medium sm:block",
-                    isCompleted && "text-blue-600",
-                    isCurrent && "text-blue-600",
+                    isCompleted && "text-green-600",
+                    isCurrent && "text-green-600",
                     !isCompleted && !isCurrent && "text-gray-400"
                   )}
                 >
@@ -64,7 +64,7 @@ export default function Stepper({ steps, currentStep, className }: StepperProps)
                 <div
                   className={cn(
                     "mx-2 h-0.5 flex-1 transition-colors",
-                    isCompleted ? "bg-blue-600" : "bg-gray-300"
+                    isCompleted ? "bg-green-600" : "bg-gray-300"
                   )}
                 />
               )}

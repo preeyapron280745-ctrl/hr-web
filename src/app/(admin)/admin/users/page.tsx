@@ -27,7 +27,7 @@ const roleLabels: Record<string, string> = {
 };
 
 const roleBadgeColors: Record<string, string> = {
-  hr: "bg-blue-100 text-blue-700",
+  hr: "bg-green-100 text-green-700",
   admin: "bg-purple-100 text-purple-700",
   manager: "bg-green-100 text-green-700",
 };
@@ -134,7 +134,7 @@ export default function UsersPage() {
             placeholder="ค้นหาผู้ใช้..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
           />
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function UsersPage() {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         {loading ? (
           <div className="flex h-48 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -175,8 +175,8 @@ export default function UsersPage() {
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100">
-                            <User className="h-4 w-4 text-blue-600" />
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100">
+                            <User className="h-4 w-4 text-green-600" />
                           </div>
                           <span className="font-medium text-gray-900">
                             {user.name}
@@ -256,7 +256,7 @@ export default function UsersPage() {
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 >
                   <option value="hr">HR</option>
                   <option value="manager">ผู้จัดการ</option>

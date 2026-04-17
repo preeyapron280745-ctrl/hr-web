@@ -77,20 +77,20 @@ export default function FileUpload({
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-6 py-8 transition-colors",
           isDragging
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/50"
+            ? "border-green-500 bg-green-50"
+            : "border-gray-300 bg-gray-50 hover:border-green-400 hover:bg-green-50/50"
         )}
       >
         <UploadCloud
           className={cn(
             "h-10 w-10",
-            isDragging ? "text-blue-500" : "text-gray-400"
+            isDragging ? "text-green-500" : "text-gray-400"
           )}
         />
         <div className="text-center">
           <p className="text-sm font-medium text-gray-700">
             ลากไฟล์มาวางที่นี่ หรือ{" "}
-            <span className="text-blue-600 underline">เลือกไฟล์</span>
+            <span className="text-green-600 underline">เลือกไฟล์</span>
           </p>
           {maxSize && (
             <p className="mt-1 text-xs text-gray-500">

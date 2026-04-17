@@ -119,7 +119,7 @@ export default function DepartmentsPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
       </div>
     );
   }
@@ -164,7 +164,7 @@ export default function DepartmentsPage() {
                     ) : (
                       <ChevronRight className="h-5 w-5 text-gray-400" />
                     )}
-                    <Building2 className="h-5 w-5 text-blue-600" />
+                    <Building2 className="h-5 w-5 text-green-600" />
                     <span className="font-medium text-gray-900">
                       {dept.name}
                     </span>
@@ -193,7 +193,7 @@ export default function DepartmentsPage() {
                                 {pos.title}
                               </span>
                               {pos.level && (
-                                <span className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-600">
+                                <span className="rounded bg-green-50 px-2 py-0.5 text-xs text-green-600">
                                   {pos.level}
                                 </span>
                               )}
@@ -215,7 +215,7 @@ export default function DepartmentsPage() {
                         setSelectedDeptId(dept.id);
                         setShowPosModal(true);
                       }}
-                      className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+                      className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
                     >
                       <Plus className="h-4 w-4" />
                       เพิ่มตำแหน่ง

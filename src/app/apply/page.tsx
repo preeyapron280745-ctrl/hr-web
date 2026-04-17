@@ -1495,7 +1495,7 @@ function Page12({ data, update }: any) {
         </Field>
       </div>
 
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+      <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
         💡 หลังจากกดบันทึก ข้อมูลจะไม่สามารถแก้ไขได้อีก กรุณาตรวจสอบความถูกต้องก่อนส่ง
       </div>
     </div>
