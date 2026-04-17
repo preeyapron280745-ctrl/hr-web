@@ -28,10 +28,14 @@ export async function POST(request: Request) {
       if (data[f]) data[f] = new Date(data[f]);
     }
 
+    // Allow caller to set status (e.g. "RESUME" from From Resume, "SUBMITTED" from /apply)
+    const targetStatus = data.status || "SUBMITTED";
+    delete data.status;
+
     const form = await prisma.applicationForm.create({
       data: {
         ...data,
-        status: "SUBMITTED",
+        status: targetStatus,
         submittedAt: new Date(),
       },
     });

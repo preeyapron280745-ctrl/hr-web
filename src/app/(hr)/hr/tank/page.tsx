@@ -100,7 +100,7 @@ export default function TankPage() {
       const res = await fetch(`/api/application-forms/${selectedRow.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "SUBMITTED", note: "ส่งต่อจากถังพัก" }),
+        body: JSON.stringify({ status: "RESUME", note: "ส่งต่อจากถังพัก" }),
       });
       if (!res.ok) throw new Error("Failed");
       setSuccessMsg(`ส่ง "${fullName(selectedRow)}" ไปยัง Resume แล้ว`);

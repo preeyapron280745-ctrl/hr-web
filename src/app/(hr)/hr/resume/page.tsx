@@ -76,8 +76,7 @@ export default function HRResumePage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.set("hasResume", "true");
-      params.set("status", "ALL");
+      params.set("status", "RESUME");
       if (company) params.set("company", company);
       if (employeeType) params.set("employeeType", employeeType);
       if (positionId) params.set("positionId", positionId);
@@ -86,8 +85,7 @@ export default function HRResumePage() {
       const res = await fetch(`/api/application-forms?${params.toString()}`);
       if (res.ok) {
         const data: ResumeForm[] = await res.json();
-        // Safety: filter on client if API doesn't filter
-        setForms(data.filter((f) => f.resumeUrl));
+        setForms(data);
       }
     } catch (err) {
       console.error(err);

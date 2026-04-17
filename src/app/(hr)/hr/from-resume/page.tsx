@@ -135,6 +135,7 @@ export default function FromResumePage() {
     setSaving(true);
     try {
       const payload = {
+        status: "RESUME",
         employeeType,
         company,
         positionId: positionId1,
@@ -169,7 +170,7 @@ export default function FromResumePage() {
         setError(err?.error || "บันทึกข้อมูลไม่สำเร็จ");
         return;
       }
-      router.push("/hr/applications");
+      router.push("/hr/resume");
     } catch (err) {
       setError("เกิดข้อผิดพลาดในการบันทึก");
     } finally {

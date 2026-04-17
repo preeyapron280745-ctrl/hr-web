@@ -86,6 +86,7 @@ export async function PATCH(
       "DRAFT",
       "TANK",
       "TANK_REJECTED",
+      "RESUME",
       "SUBMITTED",
       "SCREENING",
       "INTERVIEW_SCHEDULED",

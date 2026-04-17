@@ -75,8 +75,7 @@ export default function ManagerResumeDataPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.set("hasResume", "true");
-      params.set("status", "ALL");
+      params.set("status", "RESUME");
       if (company) params.set("company", company);
       if (employeeType) params.set("employeeType", employeeType);
       if (positionId) params.set("positionId", positionId);
@@ -85,7 +84,7 @@ export default function ManagerResumeDataPage() {
       const res = await fetch(`/api/application-forms?${params.toString()}`);
       if (res.ok) {
         const data: ResumeForm[] = await res.json();
-        setForms(data.filter((f) => f.resumeUrl));
+        setForms(data);
       }
     } catch (err) {
       console.error(err);
