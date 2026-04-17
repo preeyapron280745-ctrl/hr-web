@@ -50,6 +50,9 @@ const VALID_FIELDS = new Set([
   "tankStatus", "reviewer1", "reviewer2", "reviewer3",
   "reviewerStatus1", "reviewerStatus2", "reviewerStatus3", "tankRejectReason",
   "lastCompany", "lastPosition", "lastSalaryMin", "lastSalaryMax",
+  "interviewSlot1Date", "interviewSlot1Time", "interviewSlot1Location",
+  "interviewSlot2Date", "interviewSlot2Time", "interviewSlot2Location",
+  "interviewSlot3Date", "interviewSlot3Time", "interviewSlot3Location",
 ]);
 
 export async function POST(request: Request) {

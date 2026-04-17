@@ -637,6 +637,15 @@ model ApplicationForm {
   reviewerStatus2          String?
   reviewerStatus3          String?
   tankRejectReason         String?
+  interviewSlot1Date       DateTime?    @db.Date
+  interviewSlot1Time       String?
+  interviewSlot1Location   String?
+  interviewSlot2Date       DateTime?    @db.Date
+  interviewSlot2Time       String?
+  interviewSlot2Location   String?
+  interviewSlot3Date       DateTime?    @db.Date
+  interviewSlot3Time       String?
+  interviewSlot3Location   String?
   submittedAt              DateTime?
   createdAt                DateTime             @default(now())
   updatedAt                DateTime             @updatedAt
