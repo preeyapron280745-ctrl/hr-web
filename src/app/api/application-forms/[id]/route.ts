@@ -84,6 +84,8 @@ export async function PATCH(
 
     const VALID_STATUSES = [
       "DRAFT",
+      "TANK",
+      "TANK_REJECTED",
       "SUBMITTED",
       "SCREENING",
       "INTERVIEW_SCHEDULED",

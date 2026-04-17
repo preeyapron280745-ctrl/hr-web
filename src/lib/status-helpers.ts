@@ -1,5 +1,7 @@
 export const FORM_STATUS_LABELS: Record<string, string> = {
   DRAFT: "ร่าง",
+  TANK: "ถังพัก (รอพิจารณา)",
+  TANK_REJECTED: "ถังพัก (ไม่สนใจ)",
   SUBMITTED: "ส่งใบสมัครแล้ว",
   SCREENING: "กำลังคัดกรอง",
   INTERVIEW_SCHEDULED: "นัดสัมภาษณ์",
@@ -11,6 +13,8 @@ export const FORM_STATUS_LABELS: Record<string, string> = {
 
 export const FORM_STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-700 border-gray-200",
+  TANK: "bg-pink-100 text-pink-700 border-pink-200",
+  TANK_REJECTED: "bg-pink-50 text-pink-500 border-pink-200",
   SUBMITTED: "bg-blue-100 text-blue-700 border-blue-200",
   SCREENING: "bg-yellow-100 text-yellow-700 border-yellow-200",
   INTERVIEW_SCHEDULED: "bg-purple-100 text-purple-700 border-purple-200",

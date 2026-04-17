@@ -439,6 +439,8 @@ enum EmployeeType {
 
 enum FormStatus {
   DRAFT
+  TANK
+  TANK_REJECTED
   SUBMITTED
   SCREENING
   INTERVIEW_SCHEDULED
@@ -618,6 +620,14 @@ model ApplicationForm {
   consentSignerTitle       String?
   consentSignerName        String?
   consent2                 String?
+  tankStatus               String?
+  reviewer1                String?
+  reviewer2                String?
+  reviewer3                String?
+  reviewerStatus1          String?
+  reviewerStatus2          String?
+  reviewerStatus3          String?
+  tankRejectReason         String?
   submittedAt              DateTime?
   createdAt                DateTime             @default(now())
   updatedAt                DateTime             @updatedAt

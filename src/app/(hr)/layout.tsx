@@ -10,10 +10,12 @@ import {
   ClipboardList,
   Award,
   UserX,
+  Inbox,
 } from "lucide-react";
 
 const hrMenuItems: MenuItem[] = [
   { label: "Dashboard รวม", href: "/hr/dashboard", icon: LayoutDashboard },
+  { label: "ถังพัก", href: "/hr/tank", icon: Inbox },
   { label: "From Resume", href: "/hr/from-resume", icon: FilePlus },
   { label: "Resume", href: "/hr/resume", icon: FileText },
   { label: "ตำแหน่งงาน", href: "/hr/postings", icon: Briefcase },
