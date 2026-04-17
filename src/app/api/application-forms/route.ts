@@ -23,8 +23,10 @@ export async function GET(request: NextRequest) {
     if (status && status !== "ALL") {
       where.status = status as any;
     } else {
-      // Exclude DRAFT by default when no specific status filter applied
-      where.status = { not: "DRAFT" as any };
+      // Default: show only real applications (exclude DRAFT, TANK, TANK_REJECTED, RESUME)
+      where.status = {
+        in: ["SUBMITTED", "SCREENING", "INTERVIEW_SCHEDULED", "INTERVIEWED", "PROBATION", "HIRED", "REJECTED"] as any[],
+      };
     }
 
     if (company) {
