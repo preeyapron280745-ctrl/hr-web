@@ -464,6 +464,9 @@ export default function HRApplicationDetailPage() {
       setShowInterviewerModal(false);
       setInterviewerId(""); setInterviewerEmail(""); setInterviewerCc("");
       await load();
+      // Auto-open confirm interview modal
+      setConfirmDate(""); setConfirmTime(""); setConfirmLocation("ONSITE"); setConfirmDetails("");
+      setTimeout(() => setShowConfirmModal(true), 100);
     } catch { alert("เกิดข้อผิดพลาด"); }
     finally { setModalSaving(false); }
   }
@@ -662,72 +665,15 @@ export default function HRApplicationDetailPage() {
               📅 คอนเฟิร์มวันสัมภาษณ์
             </button>
           )}
-          {canScreen && (
-            <button
-              onClick={() => updateStatus("SCREENING")}
-              disabled={acting !== null}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 disabled:opacity-50"
-            >
-              {acting === "SCREENING" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-              เริ่มคัดกรอง
-            </button>
+          {status === "INTERVIEW_SCHEDULED" && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+              <CheckCircle2 className="h-4 w-4" />
+              นัดสัมภาษณ์แล้ว — รอใบประเมินสัมภาษณ์
+            </span>
           )}
-          {canPassScreening && (
-            <button
-              onClick={() => updateStatus("INTERVIEW_SCHEDULED")}
-              disabled={acting !== null}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 disabled:opacity-50"
-            >
-              {acting === "INTERVIEW_SCHEDULED" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <CheckCircle2 className="h-4 w-4" />
-              )}
-              ผ่านคัดกรอง
-            </button>
-          )}
-          {canHire && (
-            <button
-              onClick={() =>
-                updateStatus("HIRED", "ยืนยันรับผู้สมัครเข้าทำงาน?")
-              }
-              disabled={acting !== null}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 disabled:opacity-50"
-            >
-              {acting === "HIRED" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <UserCheck className="h-4 w-4" />
-              )}
-              รับเข้าทำงาน
-            </button>
-          )}
-          {canReject && (
-            <button
-              onClick={() =>
-                updateStatus(
-                  "REJECTED",
-                  "ยืนยันไม่ผ่าน/ปฏิเสธผู้สมัครรายนี้?"
-                )
-              }
-              disabled={acting !== null}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100 disabled:opacity-50"
-            >
-              {acting === "REJECTED" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <XCircle className="h-4 w-4" />
-              )}
-              ไม่ผ่าน/ปฏิเสธ
-            </button>
-          )}
-          {!canScreen && !canPassScreening && !canHire && !canReject && (
+          {(status === "INTERVIEWED" || status === "PROBATION" || status === "HIRED" || status === "REJECTED") && (
             <span className="text-xs text-gray-500">
-              ไม่มีการดำเนินการเพิ่มเติม
+              สถานะ: {FORM_STATUS_LABELS[status] || status}
             </span>
           )}
         </div>
