@@ -104,12 +104,14 @@ export default function ApplyPage() {
 
   useEffect(() => {
     if (data.company) {
-      fetch(`/api/reference?type=positions&company=${data.company}`)
+      const params = new URLSearchParams({ type: "positions", company: data.company });
+      if (data.employeeType) params.set("employeeType", data.employeeType);
+      fetch(`/api/reference?${params}`)
         .then((r) => r.json())
         .then(setPositions)
         .catch(() => setPositions([]));
     }
-  }, [data.company]);
+  }, [data.company, data.employeeType]);
 
   // Age calculation
   useEffect(() => {

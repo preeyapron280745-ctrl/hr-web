@@ -49,6 +49,7 @@ model JobPosition {
   department   Department   @relation(fields: [departmentId], references: [id])
   departmentId String
   company      Company?
+  employeeType String?
   active       Boolean      @default(true)
   jobPostings  JobPosting[]
 }

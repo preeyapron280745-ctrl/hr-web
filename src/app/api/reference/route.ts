@@ -21,10 +21,14 @@ export async function GET(request: Request) {
       return NextResponse.json(provinces);
     }
     if (type === "positions") {
+      const employeeType = url.searchParams.get("employeeType");
       const positions = await prisma.jobPosition.findMany({
         where: {
           active: true,
           ...(company ? { company: company as any } : {}),
+          ...(employeeType
+            ? { OR: [{ employeeType }, { employeeType: null }] }
+            : {}),
         },
         orderBy: { title: "asc" },
       });
