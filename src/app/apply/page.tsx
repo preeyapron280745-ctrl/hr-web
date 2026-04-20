@@ -1184,7 +1184,13 @@ function Page7({ data, update }: any) {
     next[i] = { ...next[i], [field]: value };
     update("languages", next);
   };
-  const levels = ["ดี", "พอใช้", "อ่อน"];
+  const levels = [
+    "5 (ดีมาก)",
+    "4 (ดี)",
+    "3 (ปานกลาง)",
+    "2 (พอใช้)",
+    "1 (ไม่ได้เลย/ต้องพัฒนา)",
+  ];
 
   return (
     <div className="space-y-4">
