@@ -790,22 +790,34 @@ function Page3({ data, update, hospitals, provinces, isEmployee, isIntern, isMon
 
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="สัญชาติ" required>
-          <select value={data.nationality || ""} onChange={(e) => update("nationality", e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5">
+          <select value={NATIONALITIES.includes(data.nationality) ? data.nationality : (data.nationality ? "อื่นๆ" : "")} onChange={(e) => update("nationality", e.target.value === "อื่นๆ" ? "" : e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5" required>
             <option value="">-- เลือก --</option>
             {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
+            <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
           </select>
+          {(!NATIONALITIES.includes(data.nationality) && data.nationality !== undefined) && (
+            <Input className="mt-2" placeholder="โปรดระบุสัญชาติ" value={data.nationality || ""} onChange={(e) => update("nationality", e.target.value)} />
+          )}
         </Field>
         <Field label="เชื้อชาติ" required>
-          <select value={data.ethnicity || ""} onChange={(e) => update("ethnicity", e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5">
+          <select value={NATIONALITIES.includes(data.ethnicity) ? data.ethnicity : (data.ethnicity ? "อื่นๆ" : "")} onChange={(e) => update("ethnicity", e.target.value === "อื่นๆ" ? "" : e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5" required>
             <option value="">-- เลือก --</option>
             {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
+            <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
           </select>
+          {(!NATIONALITIES.includes(data.ethnicity) && data.ethnicity !== undefined) && (
+            <Input className="mt-2" placeholder="โปรดระบุเชื้อชาติ" value={data.ethnicity || ""} onChange={(e) => update("ethnicity", e.target.value)} />
+          )}
         </Field>
         <Field label="ศาสนา" required>
-          <select value={data.religion || ""} onChange={(e) => update("religion", e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5">
+          <select value={RELIGIONS.includes(data.religion) ? data.religion : (data.religion ? "อื่นๆ" : "")} onChange={(e) => update("religion", e.target.value === "อื่นๆ" ? "" : e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5" required>
             <option value="">-- เลือก --</option>
             {RELIGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
           </select>
+          {(!RELIGIONS.includes(data.religion) && data.religion !== undefined) && (
+            <Input className="mt-2" placeholder="โปรดระบุศาสนา" value={data.religion || ""} onChange={(e) => update("religion", e.target.value)} />
+          )}
         </Field>
       </div>
 
@@ -838,32 +850,32 @@ function Page3({ data, update, hospitals, provinces, isEmployee, isIntern, isMon
           </Field>
           {data.socialSecurityStatus === "มีสิทธิประกันสังคม" && (
             <>
-              <Field label="บัตรรับรองสิทธิกับโรงพยาบาล">
-                <select value={data.hospitalWithSS || ""} onChange={(e) => update("hospitalWithSS", e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5">
-                  <option value="">-- เลือกโรงพยาบาล --</option>
-                  {hospitals.map((h: any) => <option key={h.id} value={h.name}>{h.name}</option>)}
-                </select>
+              <Field label="บัตรรับรองสิทธิกับโรงพยาบาล (พิมพ์เพื่อค้นหา)">
+                <Input
+                  list="hospitals-withss"
+                  placeholder="เริ่มพิมพ์เพื่อค้นหาโรงพยาบาล..."
+                  value={data.hospitalWithSS || ""}
+                  onChange={(e) => update("hospitalWithSS", e.target.value)}
+                />
+                <datalist id="hospitals-withss">
+                  {hospitals.map((h: any) => <option key={h.id} value={h.name} />)}
+                </datalist>
               </Field>
-              {data.hospitalWithSS === "อื่นๆ" && (
-                <Field label="โปรดระบุ">
-                  <Input value={data.hospitalWithSSOther || ""} onChange={(e) => update("hospitalWithSSOther", e.target.value)} />
-                </Field>
-              )}
             </>
           )}
           {data.socialSecurityStatus === "ไม่มีสิทธิประกันสังคม" && (
             <>
-              <Field label="ระบุโรงพยาบาล">
-                <select value={data.hospitalNoSS || ""} onChange={(e) => update("hospitalNoSS", e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5">
-                  <option value="">-- เลือกโรงพยาบาล --</option>
-                  {hospitals.map((h: any) => <option key={h.id} value={h.name}>{h.name}</option>)}
-                </select>
+              <Field label="ระบุโรงพยาบาล (พิมพ์เพื่อค้นหา)">
+                <Input
+                  list="hospitals-noss"
+                  placeholder="เริ่มพิมพ์เพื่อค้นหาโรงพยาบาล..."
+                  value={data.hospitalNoSS || ""}
+                  onChange={(e) => update("hospitalNoSS", e.target.value)}
+                />
+                <datalist id="hospitals-noss">
+                  {hospitals.map((h: any) => <option key={h.id} value={h.name} />)}
+                </datalist>
               </Field>
-              {data.hospitalNoSS === "อื่นๆ" && (
-                <Field label="โปรดระบุ">
-                  <Input value={data.hospitalNoSSOther || ""} onChange={(e) => update("hospitalNoSSOther", e.target.value)} />
-                </Field>
-              )}
             </>
           )}
 
@@ -1092,7 +1104,8 @@ function Page5({ data, update }: any) {
 /* ======= PAGE 6: ประสบการณ์ทำงาน ======= */
 function Page6({ data, update }: any) {
   const items = data.workExperiences || [];
-  const addItem = () => update("workExperiences", [...items, { company: "", position: "", startDate: "", endDate: "", salary: "", reasonForLeaving: "", responsibilities: "" }]);
+  const hasExp = data.hasWorkExperience;
+  const addItem = () => update("workExperiences", [...items, { company: "", position: "", stillWorking: "", startDate: "", endDate: "", salary: "", reasonForLeaving: "", responsibilities: "" }]);
   const removeItem = (i: number) => update("workExperiences", items.filter((_: any, idx: number) => idx !== i));
   const updateItem = (i: number, field: string, value: any) => {
     const next = [...items];
@@ -1102,31 +1115,60 @@ function Page6({ data, update }: any) {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="ประสบการณ์ทำงาน 3 บริษัทล่าสุด" />
-      {items.map((item: any, i: number) => (
-        <div key={i} className="rounded-lg border border-green-200 bg-green-50/50 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h4 className="font-semibold">บริษัท #{i + 1}</h4>
-            <button onClick={() => removeItem(i)} className="text-red-500 hover:text-red-700">
-              <Trash2 className="h-5 w-5" />
+      <PageHeader title="ประสบการณ์ทำงาน ล่าสุดเริ่มบรรทัดแรกตามลำดับ" />
+
+      <Field label="ท่านมีประสบการณ์ทำงานหรือไม่" required>
+        <RadioGroup
+          options={["มี", "ไม่มี"]}
+          value={hasExp || ""}
+          onChange={(v) => {
+            update("hasWorkExperience", v);
+            if (v === "ไม่มี") update("workExperiences", []);
+            else if (v === "มี" && items.length === 0) addItem();
+          }}
+          columns={2}
+        />
+      </Field>
+
+      {hasExp === "มี" && (
+        <>
+          {items.map((item: any, i: number) => (
+            <div key={i} className="rounded-lg border border-green-200 bg-green-50/50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h4 className="font-semibold">บริษัท #{i + 1}</h4>
+                {items.length > 1 && (
+                  <button onClick={() => removeItem(i)} className="text-red-500 hover:text-red-700">
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+              <div className="space-y-3">
+                <Field label="ยังทำงานที่ปัจจุบันอยู่หรือไม่" required>
+                  <RadioGroup options={["ใช่", "ไม่ใช่"]} value={item.stillWorking || ""} onChange={(v) => updateItem(i, "stillWorking", v)} columns={2} />
+                </Field>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="ชื่อบริษัท" required><Input required value={item.company} onChange={(e) => updateItem(i, "company", e.target.value)} /></Field>
+                  <Field label="ตำแหน่งงาน" required><Input required value={item.position} onChange={(e) => updateItem(i, "position", e.target.value)} /></Field>
+                  <Field label="ปี พ.ศ. ที่เริ่มทำงาน" required><Input required type="date" value={item.startDate} onChange={(e) => updateItem(i, "startDate", e.target.value)} /></Field>
+                  {item.stillWorking !== "ใช่" && (
+                    <Field label="ปี พ.ศ. ที่สิ้นสุด" required><Input required type="date" value={item.endDate} onChange={(e) => updateItem(i, "endDate", e.target.value)} /></Field>
+                  )}
+                  <Field label="เงินเดือน (บาท)" required><Input required type="number" value={item.salary} onChange={(e) => updateItem(i, "salary", +e.target.value)} /></Field>
+                  {item.stillWorking !== "ใช่" && (
+                    <Field label="สาเหตุที่ออก" required><Input required value={item.reasonForLeaving} onChange={(e) => updateItem(i, "reasonForLeaving", e.target.value)} /></Field>
+                  )}
+                </div>
+                <Field label="หน้าที่ที่รับผิดชอบ (พอสังเขป)" required><Textarea required value={item.responsibilities} onChange={(e) => updateItem(i, "responsibilities", e.target.value)} /></Field>
+              </div>
+            </div>
+          ))}
+          {items.length < 3 && (
+            <button type="button" onClick={addItem} className="flex items-center gap-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50 px-4 py-3 text-green-700 hover:bg-green-100">
+              <Plus className="h-5 w-5" />
+              เพิ่มประสบการณ์ทำงาน (สูงสุด 3 บริษัท)
             </button>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <Field label="ชื่อบริษัท"><Input value={item.company} onChange={(e) => updateItem(i, "company", e.target.value)} /></Field>
-            <Field label="ตำแหน่ง"><Input value={item.position} onChange={(e) => updateItem(i, "position", e.target.value)} /></Field>
-            <Field label="เริ่มงาน"><Input type="date" value={item.startDate} onChange={(e) => updateItem(i, "startDate", e.target.value)} /></Field>
-            <Field label="ถึง"><Input type="date" value={item.endDate} onChange={(e) => updateItem(i, "endDate", e.target.value)} /></Field>
-            <Field label="เงินเดือน (บาท)"><Input type="number" value={item.salary} onChange={(e) => updateItem(i, "salary", +e.target.value)} /></Field>
-            <Field label="เหตุผลที่ออก"><Input value={item.reasonForLeaving} onChange={(e) => updateItem(i, "reasonForLeaving", e.target.value)} /></Field>
-          </div>
-          <Field label="หน้าที่รับผิดชอบ"><Textarea value={item.responsibilities} onChange={(e) => updateItem(i, "responsibilities", e.target.value)} /></Field>
-        </div>
-      ))}
-      {items.length < 3 && (
-        <button onClick={addItem} className="flex items-center gap-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50 px-4 py-3 text-green-700 hover:bg-green-100">
-          <Plus className="h-5 w-5" />
-          เพิ่มประสบการณ์ทำงาน
-        </button>
+          )}
+        </>
       )}
     </div>
   );
