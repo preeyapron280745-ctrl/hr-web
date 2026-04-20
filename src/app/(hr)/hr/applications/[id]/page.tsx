@@ -510,6 +510,14 @@ export default function HRApplicationDetailPage() {
           <ArrowLeft className="h-4 w-4" />
           กลับ
         </button>
+        <a
+          href={`/hr/applications/${form.id}/print`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700"
+        >
+          📄 Export PDF
+        </a>
       </div>
 
       {/* Header Card */}
