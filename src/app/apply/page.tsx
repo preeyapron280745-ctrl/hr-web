@@ -156,6 +156,9 @@ export default function ApplyPage() {
       const payload: any = {
         ...data,
         positionTitle: position?.title || data.positionTitle || "",
+        // Auto-fill consent signer from Page 3
+        consentSignerTitle: data.titleTh || null,
+        consentSignerName: [data.firstNameTh, data.lastNameTh].filter(Boolean).join(" ") || null,
       };
 
       const res = await fetch("/api/forms/submit", {
@@ -1543,6 +1546,10 @@ function Page11({ data, isIntern }: any) {
 function Page12({ data, update }: any) {
   const consentText = data.company === "ICT" ? CONSENT_TEXT_ICT : CONSENT_TEXT_COMETS;
 
+  // Auto-fill from Page 3
+  const autoTitle = data.titleTh || "";
+  const autoName = [data.firstNameTh, data.lastNameTh].filter(Boolean).join(" ") || "";
+
   return (
     <div className="space-y-6">
       <PageHeader title="หนังสือให้ความยินยอมการเก็บรวบรวม ใช้ และ/หรือเปิดเผยข้อมูลส่วนบุคคล" subtitle="Consent Form สำหรับผู้สมัครงาน" />
@@ -1556,12 +1563,13 @@ function Page12({ data, update }: any) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="คำนำหน้า" required>
-          <RadioGroup options={TITLE_TH} value={data.consentSignerTitle || ""} onChange={(v) => update("consentSignerTitle", v)} columns={3} />
+          <Input value={autoTitle} readOnly className="bg-gray-50 cursor-not-allowed" />
         </Field>
         <Field label="ชื่อ-นามสกุล" required>
-          <Input value={data.consentSignerName || ""} onChange={(e) => update("consentSignerName", e.target.value)} />
+          <Input value={autoName} readOnly className="bg-gray-50 cursor-not-allowed" />
         </Field>
       </div>
+      <p className="text-xs text-gray-500 -mt-2">* ดึงจากข้อมูลที่กรอกในหน้าประวัติส่วนตัวอัตโนมัติ</p>
 
       <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
         💡 หลังจากกดบันทึก ข้อมูลจะไม่สามารถแก้ไขได้อีก กรุณาตรวจสอบความถูกต้องก่อนส่ง
