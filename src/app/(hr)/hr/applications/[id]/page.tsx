@@ -345,44 +345,57 @@ function ListOrDash({ items }: { items: string[] | null | undefined }) {
   );
 }
 
+const EDU_FIELD_LABELS: Record<string, string> = {
+  institution: "ชื่อสถานศึกษา",
+  faculty: "คณะ",
+  major: "สาขาวิชา",
+  startYear: "เริ่มปี พ.ศ.",
+  endYear: "สำเร็จปี พ.ศ.",
+  gpa: "เกรดเฉลี่ย",
+  degree: "วุฒิ",
+};
+
 function EducationView({ data }: { data: any }) {
-  if (!data) return <div className="text-sm text-gray-500">-</div>;
-  if (Array.isArray(data)) {
-    if (data.length === 0) return <div className="text-sm text-gray-500">-</div>;
+  if (!data || (typeof data === "object" && Object.keys(data).length === 0)) {
+    return <div className="text-sm text-gray-500">-</div>;
+  }
+
+  // Expected shape: { "ระดับปริญญาตรี": { institution, faculty, major, startYear, endYear, gpa }, ... }
+  if (typeof data === "object" && !Array.isArray(data)) {
+    const entries = Object.entries(data).filter(([, v]) => {
+      if (!v) return false;
+      if (typeof v === "object") return Object.values(v).some((x) => x !== null && x !== "");
+      return true;
+    });
+    if (entries.length === 0) return <div className="text-sm text-gray-500">-</div>;
+
     return (
       <div className="space-y-3">
-        {data.map((row, idx) => (
-          <div
-            key={idx}
-            className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700"
-          >
-            {Object.entries(row).map(([k, v]) => (
-              <div key={k} className="flex gap-2">
-                <span className="min-w-[120px] font-medium text-gray-500">
-                  {k}:
-                </span>
-                <span className="text-gray-900">{String(v ?? "-")}</span>
+        {entries.map(([level, detail]) => (
+          <div key={level} className="rounded-lg border border-green-200 bg-green-50/50 p-4">
+            <h4 className="mb-2 font-semibold text-green-700">{level}</h4>
+            {typeof detail === "object" && detail !== null ? (
+              <div className="grid gap-2 md:grid-cols-2">
+                {Object.entries(detail).map(([k, v]) => {
+                  const label = EDU_FIELD_LABELS[k] || k;
+                  const value = v === null || v === "" ? "-" : String(v);
+                  return (
+                    <div key={k} className="flex gap-2 text-sm">
+                      <span className="min-w-[130px] font-medium text-gray-500">{label}:</span>
+                      <span className="text-gray-900">{value}</span>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
+            ) : (
+              <span className="text-sm text-gray-700">{String(detail ?? "-")}</span>
+            )}
           </div>
         ))}
       </div>
     );
   }
-  if (typeof data === "object") {
-    return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-        {Object.entries(data).map(([k, v]) => (
-          <div key={k} className="flex gap-2">
-            <span className="min-w-[120px] font-medium text-gray-500">{k}:</span>
-            <span className="text-gray-900">
-              {typeof v === "object" ? JSON.stringify(v) : String(v ?? "-")}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
+
   return <div className="text-sm text-gray-700">{String(data)}</div>;
 }
 
