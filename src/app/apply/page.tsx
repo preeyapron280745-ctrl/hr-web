@@ -610,47 +610,47 @@ function Page2({ data, update, toggleArray, positions, isMonthly, isDaily, isInt
           </Field>
 
           {incomeTypes.includes("เงินเดือนปัจจุบัน") && (
-            <Field label="เงินเดือนปัจจุบัน (บาท/เดือน)">
-              <Input type="number" value={data.currentSalary || ""} onChange={(e) => update("currentSalary", +e.target.value)} />
+            <Field label="เงินเดือนปัจจุบัน (บาท/เดือน)" required>
+              <Input type="number" required value={data.currentSalary || ""} onChange={(e) => update("currentSalary", +e.target.value)} />
             </Field>
           )}
           {incomeTypes.includes("ค่าโอที") && (
-            <Field label="ค่าโอที (บาท/เดือน)">
-              <Input type="number" value={data.otAllowance || ""} onChange={(e) => update("otAllowance", +e.target.value)} />
+            <Field label="ค่าโอที (บาท/เดือน)" required>
+              <Input type="number" required value={data.otAllowance || ""} onChange={(e) => update("otAllowance", +e.target.value)} />
             </Field>
           )}
           {incomeTypes.includes("ค่ากะ") && (
-            <Field label="ค่ากะ (บาท/เดือน)">
-              <Input type="number" value={data.shiftAllowance || ""} onChange={(e) => update("shiftAllowance", +e.target.value)} />
+            <Field label="ค่ากะ (บาท/เดือน)" required>
+              <Input type="number" required value={data.shiftAllowance || ""} onChange={(e) => update("shiftAllowance", +e.target.value)} />
             </Field>
           )}
           {incomeTypes.includes("ค่าตำแหน่ง") && (
-            <Field label="ค่าตำแหน่ง (บาท/เดือน)">
-              <Input type="number" value={data.positionAllowance || ""} onChange={(e) => update("positionAllowance", +e.target.value)} />
+            <Field label="ค่าตำแหน่ง (บาท/เดือน)" required>
+              <Input type="number" required value={data.positionAllowance || ""} onChange={(e) => update("positionAllowance", +e.target.value)} />
             </Field>
           )}
           {incomeTypes.includes("ค่าอาหาร") && (
-            <Field label="ค่าอาหาร (บาท/เดือน)">
-              <Input type="number" value={data.foodAllowance || ""} onChange={(e) => update("foodAllowance", +e.target.value)} />
+            <Field label="ค่าอาหาร (บาท/เดือน)" required>
+              <Input type="number" required value={data.foodAllowance || ""} onChange={(e) => update("foodAllowance", +e.target.value)} />
             </Field>
           )}
           {incomeTypes.includes("ค่าเดินทาง") && (
-            <Field label="ค่าเดินทาง (บาท/เดือน)">
-              <Input type="number" value={data.travelAllowance || ""} onChange={(e) => update("travelAllowance", +e.target.value)} />
+            <Field label="ค่าเดินทาง (บาท/เดือน)" required>
+              <Input type="number" required value={data.travelAllowance || ""} onChange={(e) => update("travelAllowance", +e.target.value)} />
             </Field>
           )}
           {incomeTypes.includes("โบนัส") && (
-            <Field label="โบนัส (บาท/ปี)">
-              <Input type="number" value={data.bonusYearly || ""} onChange={(e) => update("bonusYearly", +e.target.value)} />
+            <Field label="โบนัส (บาท/ปี)" required>
+              <Input type="number" required value={data.bonusYearly || ""} onChange={(e) => update("bonusYearly", +e.target.value)} />
             </Field>
           )}
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="เงินเดือนที่ต้องการ (ต่ำสุด)">
-              <Input type="number" value={data.expectedSalaryMin || ""} onChange={(e) => update("expectedSalaryMin", +e.target.value)} />
+            <Field label="เงินเดือนที่ต้องการ (ต่ำสุด)" required>
+              <Input type="number" required value={data.expectedSalaryMin || ""} onChange={(e) => update("expectedSalaryMin", +e.target.value)} />
             </Field>
-            <Field label="เงินเดือนที่ต้องการ (สูงสุด)">
-              <Input type="number" value={data.expectedSalaryMax || ""} onChange={(e) => update("expectedSalaryMax", +e.target.value)} />
+            <Field label="เงินเดือนที่ต้องการ (สูงสุด)" required>
+              <Input type="number" required value={data.expectedSalaryMax || ""} onChange={(e) => update("expectedSalaryMax", +e.target.value)} />
             </Field>
           </div>
 
@@ -719,30 +719,29 @@ function Page3({ data, update, hospitals, provinces, isEmployee, isIntern, isMon
     <div className="space-y-6">
       <PageHeader title="ประวัติส่วนตัว" />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="คำนำหน้า" required>
+      {/* ภาษาไทย */}
+      <div className="space-y-3 rounded-lg border border-green-100 bg-green-50/30 p-4">
+        <Field label="คำนำหน้า (ไทย)" required>
           <RadioGroup options={TITLE_TH} value={data.titleTh || ""} onChange={(v) => update("titleTh", v)} columns={3} />
         </Field>
-        <Field label="Name Title" required>
+        <Field label="ชื่อ-นามสกุล (ไทย)" required>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Input value={data.firstNameTh || ""} onChange={(e) => update("firstNameTh", e.target.value)} placeholder="ชื่อ" required />
+            <Input value={data.lastNameTh || ""} onChange={(e) => update("lastNameTh", e.target.value)} placeholder="นามสกุล" required />
+          </div>
+        </Field>
+      </div>
+
+      {/* ภาษาอังกฤษ */}
+      <div className="space-y-3 rounded-lg border border-green-100 bg-green-50/30 p-4">
+        <Field label="Name Title (English)" required>
           <RadioGroup options={TITLE_EN} value={data.titleEn || ""} onChange={(v) => update("titleEn", v)} columns={3} />
         </Field>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="ชื่อ-นามสกุล (ไทย)" required>
-          <Input value={data.firstNameTh || ""} onChange={(e) => update("firstNameTh", e.target.value)} placeholder="ชื่อ" />
-        </Field>
-        <Field label=" " required>
-          <Input value={data.lastNameTh || ""} onChange={(e) => update("lastNameTh", e.target.value)} placeholder="นามสกุล" />
-        </Field>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="ชื่อ-นามสกุล (ภาษาอังกฤษ)" required>
-          <Input value={data.firstNameEn || ""} onChange={(e) => update("firstNameEn", e.target.value)} placeholder="First Name" />
-        </Field>
-        <Field label=" " required>
-          <Input value={data.lastNameEn || ""} onChange={(e) => update("lastNameEn", e.target.value)} placeholder="Last Name" />
+        <Field label="ชื่อ-นามสกุล (English)" required>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Input value={data.firstNameEn || ""} onChange={(e) => update("firstNameEn", e.target.value)} placeholder="First Name" required />
+            <Input value={data.lastNameEn || ""} onChange={(e) => update("lastNameEn", e.target.value)} placeholder="Last Name" required />
+          </div>
         </Field>
       </div>
 
