@@ -14,6 +14,8 @@ export async function PATCH(
       "interviewSlot1Date", "interviewSlot1Time", "interviewSlot1Location",
       "interviewSlot2Date", "interviewSlot2Time", "interviewSlot2Location",
       "interviewSlot3Date", "interviewSlot3Time", "interviewSlot3Location",
+      "interviewer1", "interviewer1Email", "interviewer1CcEmails",
+      "confirmedDate", "confirmedTime", "confirmedLocation", "confirmedDetails",
     ];
 
     const data: any = {};

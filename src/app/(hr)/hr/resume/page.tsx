@@ -19,6 +19,8 @@ interface ResumeForm {
   interviewSlot1Date?: string | null; interviewSlot1Time?: string | null; interviewSlot1Location?: string | null;
   interviewSlot2Date?: string | null; interviewSlot2Time?: string | null; interviewSlot2Location?: string | null;
   interviewSlot3Date?: string | null; interviewSlot3Time?: string | null; interviewSlot3Location?: string | null;
+  interviewer1?: string | null; interviewer1Email?: string | null; interviewer1CcEmails?: string | null;
+  confirmedDate?: string | null; confirmedTime?: string | null; confirmedLocation?: string | null;
   submittedAt: string | null; createdAt: string;
 }
 
@@ -69,11 +71,18 @@ export default function HRResumePage() {
   const [rejectTarget, setRejectTarget] = useState<ResumeForm | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  // Confirm interview modal (HR คอนเฟิร์มวันสัมภาษณ์)
+  // Step 1: ส่งข้อมูลให้ผู้สัมภาษณ์ (Send to Interviewer)
+  const [interviewerTarget, setInterviewerTarget] = useState<ResumeForm | null>(null);
+  const [interviewerId, setInterviewerId] = useState("");
+  const [interviewerEmail, setInterviewerEmail] = useState("");
+  const [interviewerCc, setInterviewerCc] = useState("");
+
+  // Step 2: คอนเฟิร์มวันสัมภาษณ์ (Confirm Interview)
   const [confirmTarget, setConfirmTarget] = useState<ResumeForm | null>(null);
-  const [confirmSlot, setConfirmSlot] = useState("1");
-  const [confirmReviewer, setConfirmReviewer] = useState("");
-  const [confirmPosition, setConfirmPosition] = useState("");
+  const [confirmDate, setConfirmDate] = useState("");
+  const [confirmTime, setConfirmTime] = useState("");
+  const [confirmLocation, setConfirmLocation] = useState("");
+  const [confirmDetails, setConfirmDetails] = useState("");
 
   const [processing, setProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -151,21 +160,51 @@ export default function HRResumePage() {
     finally { setProcessing(false); }
   };
 
-  // คอนเฟิร์มวันสัมภาษณ์ → ส่งไปใบสัมภาษณ์
-  const handleConfirm = async () => {
-    if (!confirmTarget) return;
+  // Step 1: ส่งข้อมูลให้ผู้สัมภาษณ์
+  const handleSendInterviewer = async () => {
+    if (!interviewerTarget || !interviewerId) { alert("กรุณาเลือกผู้สัมภาษณ์"); return; }
+    const mgr = reviewers.find((r) => r.id === interviewerId);
+    if (!mgr) return;
     setProcessing(true);
     try {
-      // Change status to INTERVIEW_SCHEDULED → ย้ายไปหน้าใบสมัครงาน + ใบสัมภาษณ์
+      await fetch(`/api/application-forms/${interviewerTarget.id}/reviewer`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          interviewer1: mgr.nickname || mgr.name,
+          interviewer1Email: interviewerEmail || mgr.email,
+          interviewer1CcEmails: interviewerCc,
+          tankStatus: "ส่งให้ผู้สัมภาษณ์แล้ว",
+        }),
+      });
+      setSuccessMsg(`ส่งข้อมูลให้ ${mgr.nickname || mgr.name} แล้ว — กรุณาคอนเฟิร์มวันสัมภาษณ์ต่อ`);
+      setInterviewerTarget(null);
+      setInterviewerId(""); setInterviewerEmail(""); setInterviewerCc("");
+      await fetchForms();
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch { alert("เกิดข้อผิดพลาด"); }
+    finally { setProcessing(false); }
+  };
+
+  // Step 2: คอนเฟิร์มวันสัมภาษณ์ → ส่งไปใบสัมภาษณ์
+  const handleConfirm = async () => {
+    if (!confirmTarget) return;
+    if (!confirmDate) { alert("กรุณาระบุวันที่สัมภาษณ์"); return; }
+    setProcessing(true);
+    try {
       await fetch(`/api/application-forms/${confirmTarget.id}/reviewer`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "INTERVIEW_SCHEDULED",
           tankStatus: "คอนเฟิร์มวันสัมภาษณ์แล้ว",
+          confirmedDate: confirmDate,
+          confirmedTime: confirmTime,
+          confirmedLocation: confirmLocation,
+          confirmedDetails: confirmDetails,
         }),
       });
       setSuccessMsg(`คอนเฟิร์มวันสัมภาษณ์ "${fullName(confirmTarget)}" เรียบร้อย — ส่งไปใบสัมภาษณ์แล้ว`);
       setConfirmTarget(null);
+      setConfirmDate(""); setConfirmTime(""); setConfirmLocation(""); setConfirmDetails("");
       await fetchForms();
       setTimeout(() => setSuccessMsg(""), 4000);
     } catch { alert("เกิดข้อผิดพลาด"); }
@@ -299,9 +338,15 @@ export default function HRResumePage() {
                     </button>
                   </>
                 )}
-                {/* หัวหน้าแผนกสนใจแล้ว → HR คอนเฟิร์มวันสัมภาษณ์ */}
-                {f.reviewerStatus1 === "สนใจ" && (
-                  <button onClick={() => setConfirmTarget(f)} className="flex flex-1 items-center justify-center gap-1 border-l border-gray-100 py-2.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-50">
+                {/* หัวหน้าแผนกสนใจแล้ว + ยังไม่ส่งให้ผู้สัมภาษณ์ → ส่งข้อมูล */}
+                {f.reviewerStatus1 === "สนใจ" && !f.interviewer1 && (
+                  <button onClick={() => { setInterviewerTarget(f); setInterviewerId(""); setInterviewerEmail(""); setInterviewerCc(""); }} className="flex flex-1 items-center justify-center gap-1 border-l border-gray-100 py-2.5 text-xs font-semibold text-blue-600 hover:bg-blue-50">
+                    <Send className="h-3.5 w-3.5" />ส่งข้อมูล
+                  </button>
+                )}
+                {/* ส่งให้ผู้สัมภาษณ์แล้ว → คอนเฟิร์มวันสัมภาษณ์ */}
+                {f.reviewerStatus1 === "สนใจ" && f.interviewer1 && (
+                  <button onClick={() => { setConfirmTarget(f); setConfirmDate(f.interviewSlot1Date || ""); setConfirmTime(f.interviewSlot1Time || ""); setConfirmLocation(f.interviewSlot1Location || "ONSITE"); setConfirmDetails(""); }} className="flex flex-1 items-center justify-center gap-1 border-l border-gray-100 py-2.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-50">
                     <Calendar className="h-3.5 w-3.5" />คอนเฟิร์ม
                   </button>
                 )}
@@ -419,50 +464,136 @@ export default function HRResumePage() {
         </div>
       )}
 
-      {/* ===== MODAL: คอนเฟิร์มวันสัมภาษณ์ ===== */}
+      {/* ===== MODAL: Step 1 - ส่งข้อมูลให้ผู้สัมภาษณ์ ===== */}
+      {interviewerTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setInterviewerTarget(null)}>
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 flex items-center justify-between border-b bg-white px-6 py-4">
+              <h3 className="text-lg font-semibold">ส่งข้อมูลให้ผู้สัมภาษณ์</h3>
+              <div className="flex gap-2">
+                <button onClick={() => setInterviewerTarget(null)} className="rounded-lg border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">ยกเลิก</button>
+                <button onClick={handleSendInterviewer} disabled={!interviewerId || processing} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">บันทึก</button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="rounded-lg bg-green-50 p-3">
+                <p className="font-medium">{fullName(interviewerTarget)}</p>
+                <p className="text-xs text-gray-600">{interviewerTarget.positionTitle}</p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">ผู้สัมภาษณ์ คนที่ 1 <span className="text-red-500">*</span></label>
+                <select
+                  value={interviewerId}
+                  onChange={(e) => {
+                    setInterviewerId(e.target.value);
+                    const r = reviewers.find((x) => x.id === e.target.value);
+                    if (r?.email) setInterviewerEmail(r.email);
+                  }}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                >
+                  <option value="">-- เลือกผู้สัมภาษณ์ --</option>
+                  {reviewers.map((r) => (
+                    <option key={r.id} value={r.id}>{r.nickname || r.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Email ผู้สัมภาษณ์ คนที่ 1</label>
+                <input
+                  type="email"
+                  value={interviewerEmail}
+                  onChange={(e) => setInterviewerEmail(e.target.value)}
+                  placeholder="example@cometsintertrade.com"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">CC Email คนที่ 1</label>
+                <textarea
+                  value={interviewerCc}
+                  onChange={(e) => setInterviewerCc(e.target.value)}
+                  rows={2}
+                  placeholder="คั่นหลายอีเมลด้วยจุลภาค (,)"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">ตำแหน่งที่ต้องการสมัครงาน <span className="text-red-500">*</span></label>
+                <input type="text" readOnly value={interviewerTarget.positionTitle} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-700" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: Step 2 - Form คอนเฟิร์มวันสัมภาษณ์ ===== */}
       {confirmTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setConfirmTarget(null)}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 flex items-center justify-between border-b bg-white px-6 py-4">
-              <h3 className="text-lg font-semibold">คอนเฟิร์มวันนัดสัมภาษณ์</h3>
+              <h3 className="text-lg font-semibold">Form คอนเฟิร์มวันสัมภาษณ์</h3>
               <div className="flex gap-2">
                 <button onClick={() => setConfirmTarget(null)} className="rounded-lg border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">ยกเลิก</button>
-                <button onClick={handleConfirm} disabled={processing} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">บันทึก</button>
+                <button onClick={handleConfirm} disabled={!confirmDate || processing} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">บันทึก</button>
               </div>
             </div>
             <div className="p-6 space-y-4">
               <div className="rounded-lg bg-green-50 p-3">
                 <p className="font-medium">{fullName(confirmTarget)}</p>
-                <p className="text-xs text-gray-600">{confirmTarget.positionTitle} — {COMPANY_SHORT[confirmTarget.company]}</p>
-                <p className="mt-1 text-xs text-green-700">ผู้พิจารณา: {confirmTarget.reviewer1}</p>
+                <p className="text-xs text-gray-600">ผู้สัมภาษณ์: {confirmTarget.interviewer1}</p>
               </div>
 
               <div>
-                <h4 className="mb-3 font-semibold text-gray-900">ช่วงเวลาที่หัวหน้าแผนกระบุ</h4>
-                <div className="space-y-2">
-                  {[
-                    { n: 1, d: confirmTarget.interviewSlot1Date, t: confirmTarget.interviewSlot1Time, l: confirmTarget.interviewSlot1Location },
-                    { n: 2, d: confirmTarget.interviewSlot2Date, t: confirmTarget.interviewSlot2Time, l: confirmTarget.interviewSlot2Location },
-                    { n: 3, d: confirmTarget.interviewSlot3Date, t: confirmTarget.interviewSlot3Time, l: confirmTarget.interviewSlot3Location },
-                  ].filter(s => s.d).map(s => (
-                    <label key={s.n} className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition ${confirmSlot === String(s.n) ? "border-green-600 bg-green-50" : "border-gray-200 hover:border-green-300"}`}>
-                      <input type="radio" name="slot" value={s.n} checked={confirmSlot === String(s.n)} onChange={() => setConfirmSlot(String(s.n))} className="h-4 w-4 accent-green-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">ช่วงเวลาที่ {s.n}</p>
-                        <p className="text-sm text-gray-600">
-                          {s.d ? formatDate(s.d) : "-"} เวลา {s.t || "-"} ({s.l || "-"})
-                        </p>
-                      </div>
-                    </label>
+                <label className="mb-1.5 block text-sm font-medium">วันที่ <span className="text-red-500">*</span></label>
+                <input
+                  type="date"
+                  value={confirmDate}
+                  onChange={(e) => setConfirmDate(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">เวลาสัมภาษณ์</label>
+                <select
+                  value={confirmTime}
+                  onChange={(e) => setConfirmTime(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                >
+                  <option value=""></option>
+                  {INTERVIEW_TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">สถานที่</label>
+                <div className="flex gap-2">
+                  {["ONSITE", "ONLINE"].map(loc => (
+                    <button key={loc} type="button" onClick={() => setConfirmLocation(loc)}
+                      className={`flex-1 rounded-lg border-2 px-4 py-2 text-sm font-medium transition ${confirmLocation === loc ? "border-green-600 bg-green-600 text-white" : "border-gray-200 text-gray-700 hover:border-green-300"}`}>
+                      {loc}
+                    </button>
                   ))}
-                  {!confirmTarget.interviewSlot1Date && (
-                    <p className="text-sm text-gray-500">หัวหน้าแผนกยังไม่ได้ระบุช่วงเวลา</p>
-                  )}
                 </div>
               </div>
 
-              <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-                เมื่อคอนเฟิร์มแล้ว ใบสมัครจะย้ายไปหน้า <strong>ใบสมัครงาน (HR)</strong> สถานะ &quot;นัดสัมภาษณ์&quot; และหัวหน้าแผนกจะสามารถกรอก <strong>ใบประเมินสัมภาษณ์</strong> ได้
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">รายละเอียด</label>
+                <textarea
+                  value={confirmDetails}
+                  onChange={(e) => setConfirmDetails(e.target.value)}
+                  rows={3}
+                  placeholder="เช่น ที่อยู่สัมภาษณ์ ลิงก์ประชุม ฯลฯ"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                />
+              </div>
+
+              <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-800">
+                💡 เมื่อคอนเฟิร์ม ใบสมัครจะย้ายไปหน้า <strong>ใบสมัครงาน (HR)</strong> และหัวหน้าแผนกจะกรอก <strong>ใบประเมินสัมภาษณ์</strong> ได้
               </div>
             </div>
           </div>
