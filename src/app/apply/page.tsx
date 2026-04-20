@@ -1191,11 +1191,14 @@ function Page7({ data, update }: any) {
     "2 (พอใช้)",
     "1 (ไม่ได้เลย/ต้องพัฒนา)",
   ];
+  const LANGUAGES = ["ภาษาไทย", "ภาษาอังกฤษ", "ภาษาจีน", "ภาษาพม่า", "ภาษาลาว", "ภาษากัมพูชา", "ภาษาญี่ปุ่น", "ภาษาเกาหลี"];
 
   return (
     <div className="space-y-4">
       <PageHeader title="ความรู้ด้านภาษา" />
-      {items.map((item: any, i: number) => (
+      {items.map((item: any, i: number) => {
+        const isOther = item.language && !LANGUAGES.includes(item.language);
+        return (
         <div key={i} className="rounded-lg border border-green-200 bg-green-50/50 p-4">
           <div className="mb-3 flex items-center justify-between">
             <h4 className="font-semibold">ภาษา #{i + 1}</h4>
@@ -1205,7 +1208,23 @@ function Page7({ data, update }: any) {
               </button>
             )}
           </div>
-          <Field label="ภาษา"><Input value={item.language} onChange={(e) => updateItem(i, "language", e.target.value)} placeholder="เช่น ภาษาอังกฤษ" /></Field>
+          <Field label="ภาษา" required>
+            <select
+              value={isOther ? "อื่นๆ" : item.language || ""}
+              onChange={(e) => {
+                if (e.target.value === "อื่นๆ") updateItem(i, "language", " ");
+                else updateItem(i, "language", e.target.value);
+              }}
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5"
+            >
+              <option value="">-- เลือกภาษา --</option>
+              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+              <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
+            </select>
+            {isOther && (
+              <Input className="mt-2" placeholder="โปรดระบุภาษา" value={item.language.trim()} onChange={(e) => updateItem(i, "language", e.target.value)} />
+            )}
+          </Field>
           <div className="mt-3 grid gap-3 md:grid-cols-4">
             {["speaking", "reading", "writing", "listening"].map((k) => (
               <Field key={k} label={k === "speaking" ? "พูด" : k === "reading" ? "อ่าน" : k === "writing" ? "เขียน" : "ฟัง"}>
@@ -1217,7 +1236,7 @@ function Page7({ data, update }: any) {
             ))}
           </div>
         </div>
-      ))}
+      );})}
       <button onClick={addItem} className="flex items-center gap-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50 px-4 py-3 text-green-700 hover:bg-green-100">
         <Plus className="h-5 w-5" />
         เพิ่มภาษา
