@@ -404,6 +404,27 @@ export default function HRApplicationDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [acting, setActing] = useState<string | null>(null);
 
+  // Interviewer modal state
+  const [showInterviewerModal, setShowInterviewerModal] = useState(false);
+  const [reviewers, setReviewers] = useState<any[]>([]);
+  const [interviewerId, setInterviewerId] = useState("");
+  const [interviewerEmail, setInterviewerEmail] = useState("");
+  const [interviewerCc, setInterviewerCc] = useState("");
+
+  // Confirm interview modal state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmDate, setConfirmDate] = useState("");
+  const [confirmTime, setConfirmTime] = useState("");
+  const [confirmLocation, setConfirmLocation] = useState("ONSITE");
+  const [confirmDetails, setConfirmDetails] = useState("");
+  const [modalSaving, setModalSaving] = useState(false);
+
+  const INTERVIEW_TIMES = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","00:00"];
+
+  useEffect(() => {
+    fetch("/api/reviewers").then((r) => r.json()).then((d) => setReviewers(Array.isArray(d) ? d : [])).catch(() => {});
+  }, []);
+
   const load = useCallback(async () => {
     if (!id) return;
     setLoading(true);
@@ -426,6 +447,47 @@ export default function HRApplicationDetailPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  async function saveInterviewer() {
+    if (!form || !interviewerId) { alert("กรุณาเลือกผู้สัมภาษณ์"); return; }
+    const mgr = reviewers.find((r) => r.id === interviewerId);
+    setModalSaving(true);
+    try {
+      await fetch(`/api/application-forms/${form.id}/reviewer`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          interviewer1: mgr?.nickname || mgr?.name,
+          interviewer1Email: interviewerEmail || mgr?.email || "",
+          interviewer1CcEmails: interviewerCc,
+        }),
+      });
+      setShowInterviewerModal(false);
+      setInterviewerId(""); setInterviewerEmail(""); setInterviewerCc("");
+      await load();
+    } catch { alert("เกิดข้อผิดพลาด"); }
+    finally { setModalSaving(false); }
+  }
+
+  async function saveConfirm() {
+    if (!form) return;
+    if (!confirmDate) { alert("กรุณาระบุวันที่"); return; }
+    setModalSaving(true);
+    try {
+      await fetch(`/api/application-forms/${form.id}/reviewer`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "INTERVIEW_SCHEDULED",
+          confirmedDate: confirmDate,
+          confirmedTime: confirmTime,
+          confirmedLocation: confirmLocation,
+          confirmedDetails: confirmDetails,
+        }),
+      });
+      setShowConfirmModal(false);
+      await load();
+    } catch { alert("เกิดข้อผิดพลาด"); }
+    finally { setModalSaving(false); }
+  }
 
   async function updateStatus(next: string, confirmMsg?: string) {
     if (!form) return;
@@ -576,6 +638,30 @@ export default function HRApplicationDetailPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 border-t border-gray-200 bg-gray-50 px-5 py-3">
+          {/* Step 1: ส่งข้อมูล (ผู้สัมภาษณ์) */}
+          {(status === "SUBMITTED" || status === "SCREENING") && !(form as any).interviewer1 && (
+            <button
+              onClick={() => { setInterviewerId(""); setInterviewerEmail(""); setInterviewerCc(""); setShowInterviewerModal(true); }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+            >
+              📧 ส่งข้อมูล
+            </button>
+          )}
+          {/* Step 2: คอนเฟิร์มวันสัมภาษณ์ */}
+          {(form as any).interviewer1 && status !== "INTERVIEW_SCHEDULED" && status !== "INTERVIEWED" && status !== "PROBATION" && status !== "HIRED" && status !== "REJECTED" && (
+            <button
+              onClick={() => {
+                setConfirmDate((form as any).confirmedDate || "");
+                setConfirmTime((form as any).confirmedTime || "");
+                setConfirmLocation((form as any).confirmedLocation || "ONSITE");
+                setConfirmDetails((form as any).confirmedDetails || "");
+                setShowConfirmModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
+            >
+              📅 คอนเฟิร์มวันสัมภาษณ์
+            </button>
+          )}
           {canScreen && (
             <button
               onClick={() => updateStatus("SCREENING")}
@@ -1251,6 +1337,98 @@ export default function HRApplicationDetailPage() {
           </div>
         )}
       </Section>
+
+      {/* ===== MODAL: ส่งข้อมูลให้ผู้สัมภาษณ์ ===== */}
+      {showInterviewerModal && form && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowInterviewerModal(false)}>
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 flex items-center justify-between border-b bg-white px-6 py-4">
+              <h3 className="text-lg font-semibold">ส่งข้อมูลให้ผู้สัมภาษณ์</h3>
+              <div className="flex gap-2">
+                <button onClick={() => setShowInterviewerModal(false)} className="rounded-lg border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">ยกเลิก</button>
+                <button onClick={saveInterviewer} disabled={!interviewerId || modalSaving} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">บันทึก</button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">ผู้สัมภาษณ์ คนที่ 1 <span className="text-red-500">*</span></label>
+                <select
+                  value={interviewerId}
+                  onChange={(e) => {
+                    setInterviewerId(e.target.value);
+                    const r = reviewers.find((x) => x.id === e.target.value);
+                    if (r?.email) setInterviewerEmail(r.email);
+                  }}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                >
+                  <option value="">-- เลือกผู้สัมภาษณ์ --</option>
+                  {reviewers.map((r: any) => (
+                    <option key={r.id} value={r.id}>{r.nickname || r.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Email ผู้สัมภาษณ์ คนที่ 1</label>
+                <input type="email" value={interviewerEmail} onChange={(e) => setInterviewerEmail(e.target.value)} placeholder="example@cometsintertrade.com" className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">CC Email คนที่ 1</label>
+                <textarea value={interviewerCc} onChange={(e) => setInterviewerCc(e.target.value)} rows={2} placeholder="คั่นหลายอีเมลด้วยจุลภาค (,)" className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">ตำแหน่งที่ต้องการสมัครงาน <span className="text-red-500">*</span></label>
+                <input type="text" readOnly value={form.positionTitle} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-700" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: Form คอนเฟิร์มวันสัมภาษณ์ ===== */}
+      {showConfirmModal && form && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowConfirmModal(false)}>
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 flex items-center justify-between border-b bg-white px-6 py-4">
+              <h3 className="text-lg font-semibold">Form คอนเฟิร์มวันสัมภาษณ์</h3>
+              <div className="flex gap-2">
+                <button onClick={() => setShowConfirmModal(false)} className="rounded-lg border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">ยกเลิก</button>
+                <button onClick={saveConfirm} disabled={!confirmDate || modalSaving} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">บันทึก</button>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">วันที่ <span className="text-red-500">*</span></label>
+                <input type="date" value={confirmDate} onChange={(e) => setConfirmDate(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">เวลาสัมภาษณ์</label>
+                <select value={confirmTime} onChange={(e) => setConfirmTime(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                  <option value=""></option>
+                  {INTERVIEW_TIMES.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">สถานที่</label>
+                <div className="flex gap-2">
+                  {["ONSITE", "ONLINE"].map((loc) => (
+                    <button key={loc} type="button" onClick={() => setConfirmLocation(loc)}
+                      className={`flex-1 rounded-lg border-2 px-4 py-2 text-sm font-medium transition ${confirmLocation === loc ? "border-green-600 bg-green-600 text-white" : "border-gray-200 text-gray-700 hover:border-green-300"}`}>
+                      {loc}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">รายละเอียด</label>
+                <textarea value={confirmDetails} onChange={(e) => setConfirmDetails(e.target.value)} rows={3} placeholder="เช่น ที่อยู่สัมภาษณ์ ลิงก์ประชุม ฯลฯ" className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20" />
+              </div>
+              <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-800">
+                💡 เมื่อคอนเฟิร์ม ใบสมัครจะเปลี่ยนสถานะเป็น &quot;นัดสัมภาษณ์&quot;
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -338,16 +338,23 @@ export default function HRResumePage() {
                     </button>
                   </>
                 )}
-                {/* หัวหน้าแผนกสนใจแล้ว + ยังไม่ส่งให้ผู้สัมภาษณ์ → ส่งข้อมูล */}
-                {f.reviewerStatus1 === "สนใจ" && !f.interviewer1 && (
-                  <button onClick={() => { setInterviewerTarget(f); setInterviewerId(""); setInterviewerEmail(""); setInterviewerCc(""); }} className="flex flex-1 items-center justify-center gap-1 border-l border-gray-100 py-2.5 text-xs font-semibold text-blue-600 hover:bg-blue-50">
-                    <Send className="h-3.5 w-3.5" />ส่งข้อมูล
-                  </button>
-                )}
-                {/* ส่งให้ผู้สัมภาษณ์แล้ว → คอนเฟิร์มวันสัมภาษณ์ */}
-                {f.reviewerStatus1 === "สนใจ" && f.interviewer1 && (
-                  <button onClick={() => { setConfirmTarget(f); setConfirmDate(f.interviewSlot1Date || ""); setConfirmTime(f.interviewSlot1Time || ""); setConfirmLocation(f.interviewSlot1Location || "ONSITE"); setConfirmDetails(""); }} className="flex flex-1 items-center justify-center gap-1 border-l border-gray-100 py-2.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-50">
-                    <Calendar className="h-3.5 w-3.5" />คอนเฟิร์ม
+                {/* หัวหน้าแผนกสนใจแล้ว → ย้ายไปใบสมัครงาน */}
+                {f.reviewerStatus1 === "สนใจ" && (
+                  <button
+                    onClick={async () => {
+                      if (!confirm("ย้าย \"" + fullName(f) + "\" ไปหน้าใบสมัครงาน (HR)?")) return;
+                      await fetch(`/api/application-forms/${f.id}/reviewer`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: "SUBMITTED", tankStatus: "ย้ายไปใบสมัครงาน" }),
+                      });
+                      setSuccessMsg(`ย้าย "${fullName(f)}" ไปหน้าใบสมัครงาน (HR) แล้ว`);
+                      await fetchForms();
+                      setTimeout(() => setSuccessMsg(""), 4000);
+                    }}
+                    className="flex flex-1 items-center justify-center gap-1 border-l border-gray-100 py-2.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-50"
+                  >
+                    <Calendar className="h-3.5 w-3.5" />ย้ายไปใบสมัคร
                   </button>
                 )}
               </div>
