@@ -43,9 +43,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // /manager/* requires MANAGER or ADMIN
+  // /manager/* requires MANAGER, HR, or ADMIN (HR/ADMIN see all, Manager filtered by dept)
   if (pathname.startsWith("/manager")) {
-    if (!["MANAGER", "ADMIN"].includes(role)) {
+    if (!["MANAGER", "HR", "ADMIN"].includes(role)) {
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }

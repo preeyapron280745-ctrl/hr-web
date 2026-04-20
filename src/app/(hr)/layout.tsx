@@ -9,6 +9,7 @@ import {
   Briefcase,
   ClipboardList,
   Award,
+  UserCheck,
   UserX,
   Inbox,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const hrMenuItems: MenuItem[] = [
   { label: "ตำแหน่งงาน", href: "/hr/postings", icon: Briefcase },
   { label: "Form ใบสมัคร", href: "/apply", icon: ClipboardList },
   { label: "ใบสมัครงาน (HR)", href: "/hr/applications", icon: FileText },
+  { label: "ใบประเมินสัมภาษณ์", href: "/manager/interview-eval", icon: UserCheck },
   { label: "ใบประเมินทดลองงาน", href: "/hr/probation", icon: Award },
   { label: "ไม่ผ่าน/ปฏิเสธ", href: "/hr/rejected", icon: UserX },
 ];

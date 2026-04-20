@@ -22,7 +22,7 @@ const adminMenuItems: MenuItem[] = [
   { label: "ตำแหน่งงาน", href: "/hr/postings", icon: Briefcase },
   { label: "ใบสมัครทั้งหมด", href: "/hr/applications", icon: FileText },
   { label: "ข้อมูล Resume", href: "/hr/resume-data", icon: FileSearch },
-  { label: "ใบประเมินสัมภาษณ์", href: "/hr/interviews", icon: UserCheck },
+  { label: "ใบประเมินสัมภาษณ์", href: "/manager/interview-eval", icon: UserCheck },
   { label: "ใบประเมินทดลองงาน", href: "/hr/probation", icon: Award },
   { label: "ไม่ผ่าน/ปฏิเสธ", href: "/hr/rejected", icon: UserX },
   { label: "ตั้งค่าระบบ", href: "/admin/settings", icon: Settings },
