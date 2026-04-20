@@ -68,21 +68,60 @@ export default function PrintApplicationPage() {
       </div>
 
       <div className="printable mx-auto max-w-[210mm] bg-white p-8 text-sm text-gray-900">
-        {/* Title */}
-        <div className="mb-4 border-b-2 border-black pb-3 text-center">
-          <h1 className="text-xl font-bold">ใบสมัครงาน</h1>
-          <p className="text-base">APPLICATION FORM</p>
-          <p className="mt-1 text-xs text-gray-600">{companyFullName(form.company)}</p>
+        {/* Company Logo + Title */}
+        <div className="mb-4 grid grid-cols-[1fr_2fr_1fr] items-center gap-2">
+          <div>
+            {isICT ? (
+              <div className="flex items-center gap-2">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white">
+                  <svg viewBox="0 0 24 24" className="h-8 w-8 fill-white">
+                    <circle cx="12" cy="12" r="10" fill="#fff" />
+                    <circle cx="12" cy="12" r="8" fill="#059669" />
+                    <text x="12" y="16" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">ICT</text>
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-green-700">ICT</div>
+                  <div className="text-[7pt] text-gray-600">ICT MANUFACTURING CO., LT</div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="text-xl font-bold tracking-wider text-blue-900">COMETS</div>
+                <div className="text-[8pt] italic text-gray-500">The Sage of Beauty</div>
+              </div>
+            )}
+          </div>
+          <div className="text-center">
+            <h1 className="text-xl font-bold">ใบสมัครงาน</h1>
+            <p className="text-base">APPLICATION FORM</p>
+          </div>
+          <div className="flex justify-end">
+            {form.photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={form.photoUrl}
+                alt="photo"
+                className="h-32 w-24 border border-black object-cover"
+              />
+            ) : (
+              <div className="flex h-32 w-24 items-center justify-center border border-black bg-gray-50 text-xs text-gray-400">
+                รูปถ่าย
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Position & Source */}
-        <div className="mb-3 grid grid-cols-2 gap-2 border border-black p-2">
-          <div><strong>ตำแหน่งที่ต้องการสมัครงาน:</strong> {val(form.positionTitle)}</div>
-          <div><strong>ท่านทราบข่าวรับสมัคร:</strong> {(form.sourceOfInfo || []).join(", ")}</div>
+        <div className="mb-3 border border-black">
+          <div className="grid grid-cols-2 divide-x divide-black">
+            <div className="p-2"><strong>ตำแหน่งที่ต้องการสมัครงาน:</strong> {val(form.positionTitle)}</div>
+            <div className="p-2"><strong>ท่านทราบข่าวรับสมัคร:</strong> {(form.sourceOfInfo || []).join(", ")}</div>
+          </div>
         </div>
 
         {/* Personal Info Header */}
-        <div className="mb-2 bg-gray-100 p-1.5 text-center font-bold border border-black">ประวัติส่วนตัว</div>
+        <div className="mb-0 bg-gray-100 p-1.5 text-center font-bold border border-black border-b-0">ประวัติส่วนตัว</div>
 
         <div className="mb-3 border border-black p-2 space-y-1.5">
           <div className="grid grid-cols-[1fr_auto_auto] gap-2">
