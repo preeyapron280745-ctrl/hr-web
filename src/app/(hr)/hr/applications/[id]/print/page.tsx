@@ -71,26 +71,12 @@ export default function PrintApplicationPage() {
         {/* Company Logo + Title */}
         <div className="mb-4 grid grid-cols-[1fr_2fr_1fr] items-center gap-2">
           <div>
-            {isICT ? (
-              <div className="flex items-center gap-2">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white">
-                  <svg viewBox="0 0 24 24" className="h-8 w-8 fill-white">
-                    <circle cx="12" cy="12" r="10" fill="#fff" />
-                    <circle cx="12" cy="12" r="8" fill="#059669" />
-                    <text x="12" y="16" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">ICT</text>
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-green-700">ICT</div>
-                  <div className="text-[7pt] text-gray-600">ICT MANUFACTURING CO., LT</div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="text-xl font-bold tracking-wider text-blue-900">COMETS</div>
-                <div className="text-[8pt] italic text-gray-500">The Sage of Beauty</div>
-              </div>
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={isICT ? "/logos/ict.png" : "/logos/comets.png"}
+              alt={isICT ? "ICT Manufacturing" : "Comets"}
+              className="h-20 w-auto object-contain"
+            />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold">ใบสมัครงาน</h1>
