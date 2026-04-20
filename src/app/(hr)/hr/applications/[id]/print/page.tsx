@@ -73,7 +73,7 @@ export default function PrintApplicationPage() {
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={isICT ? "/logos/ict.png" : "/logos/comets.png"}
+              src={isICT ? "/logos/ict.jpg" : "/logos/comets.jpg"}
               alt={isICT ? "ICT Manufacturing" : "Comets"}
               className="h-20 w-auto object-contain"
             />
