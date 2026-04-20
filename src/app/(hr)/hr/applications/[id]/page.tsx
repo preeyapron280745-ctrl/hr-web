@@ -360,13 +360,8 @@ function EducationView({ data }: { data: any }) {
     return <div className="text-sm text-gray-500">-</div>;
   }
 
-  // Expected shape: { "ระดับปริญญาตรี": { institution, faculty, major, startYear, endYear, gpa }, ... }
   if (typeof data === "object" && !Array.isArray(data)) {
-    const entries = Object.entries(data).filter(([, v]) => {
-      if (!v) return false;
-      if (typeof v === "object") return Object.values(v).some((x) => x !== null && x !== "");
-      return true;
-    });
+    const entries = Object.entries(data);
     if (entries.length === 0) return <div className="text-sm text-gray-500">-</div>;
 
     return (
@@ -376,9 +371,9 @@ function EducationView({ data }: { data: any }) {
             <h4 className="mb-2 font-semibold text-green-700">{level}</h4>
             {typeof detail === "object" && detail !== null ? (
               <div className="grid gap-2 md:grid-cols-2">
-                {Object.entries(detail).map(([k, v]) => {
+                {Object.entries(detail as Record<string, any>).map(([k, v]) => {
                   const label = EDU_FIELD_LABELS[k] || k;
-                  const value = v === null || v === "" ? "-" : String(v);
+                  const value = v === null || v === "" || v === undefined ? "-" : String(v);
                   return (
                     <div key={k} className="flex gap-2 text-sm">
                       <span className="min-w-[130px] font-medium text-gray-500">{label}:</span>
